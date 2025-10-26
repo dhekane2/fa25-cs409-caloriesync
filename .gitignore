@@ -1,0 +1,14 @@
+.vscode
+
+# Node modules
+caloriesync/frontend/node_modules
+caloriesync/backend/node_modules
+
+# Environment files
+caloriesync/backend/.env
+caloriesync/frontend/.env
+
+# Build artifacts
+caloriesync/frontend/dist
+caloriesync/backend/logs
+*.log
