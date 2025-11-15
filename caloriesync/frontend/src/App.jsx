@@ -1,35 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route, Link, useLocation } from 'react-router-dom';
+import LandingPage from './pages/LandingPage.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
+import TrackCaloriesPage from './pages/TrackCaloriesPage.jsx';
+import './App.css';
+import './index.css';
 
-function App() {
-  const [count, setCount] = useState(0)
+
+function Header() {
+  const location = useLocation();
+  const isAuthPage =
+    location.pathname === '/login' || location.pathname === '/register';
+
+// Use a transparent header on the Landing page; use a regular header on all other pages
+  const headerClass =
+    location.pathname === '/'
+      ? 'cs-header cs-header-landing'
+      : 'cs-header cs-header-simple';
+
+// Do not display the header on the Login / Register pages
+  if (isAuthPage) return null;
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <header className={headerClass}>
+      <div className="cs-container cs-header-inner">
+        <Link to="/" className="cs-logo">
+          <span className="cs-logo-icon">∿</span>
+          <span className="cs-logo-text">CalorieSync</span>
+        </Link>
+
+        <div className="cs-header-actions">
+          <Link to="/login" className="cs-btn cs-btn-outline">
+            Login
+          </Link>
+          <Link to="/register" className="cs-btn cs-btn-dark">
+            Register
+          </Link>
+        </div>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    </header>
+  );
 }
 
-export default App
+export default function App() {
+  const location = useLocation();
+  const isAuthPage =
+    location.pathname === '/login' || location.pathname === '/register';
+
+  return (
+    <div className="cs-app-root">
+      {/* Only show the header on the Landing, Dashboard, and Track pages */}
+      <Header />
+
+      <main
+        className={
+          isAuthPage ? 'cs-main cs-main-auth-bg' : 'cs-main cs-main-default'
+        }
+      >
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/track" element={<TrackCaloriesPage />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}

@@ -1,42 +1,745 @@
-#root {
-  max-width: 1280px;
+/* ================================
+   GLOBAL LAYOUT
+================================ */
+.cs-app-root {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-container {
+  width: 100%;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 20px;
+}
+
+/* ================================
+   BUTTONS
+================================ */
+.cs-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s ease;
+  text-decoration: none;
+}
+
+.cs-btn-dark {
+  background: #0f172a;
+  color: white;
+}
+.cs-btn-dark:hover {
+  background: #1e293b;
+}
+
+.cs-btn-light {
+  background: white;
+  color: #0f172a;
+  border: 1px solid #d1d5db;
+}
+.cs-btn-light:hover {
+  background: #f3f4f6;
+}
+
+.cs-btn-outline {
+  background: transparent;
+  color: #0f172a;
+  border: 1px solid #0f172a;
+}
+.cs-btn-outline:hover {
+  background: #e5e7eb;
+}
+
+.cs-btn-light-outline {
+  background: transparent;
+  border: 1px solid #94a3b8;
+  color: #475569;
+}
+.cs-btn-light-outline:hover {
+  background: #f1f5f9;
+}
+
+.cs-btn-xs {
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.cs-btn-sm {
+  padding: 6px 14px;
+  font-size: 14px;
+}
+
+.cs-btn-lg {
+  padding: 14px 24px;
+  font-size: 17px;
+}
+
+/* ================================
+   LOGO
+================================ */
+.cs-logo {
+  font-weight: 700;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #0f172a;
+  text-decoration: none;
+}
+.cs-logo-icon {
+  font-size: 24px;
+  color: #16a34a;
+}
+
+/* ================================
+   HEADER
+================================ */
+.cs-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 20;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 12px 0;
+}
+
+.cs-header-landing {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(6px);
+}
+
+.cs-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cs-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ================================
+   LANDING PAGE
+================================ */
+.cs-landing-root {
+  padding-top: 80px;
+}
+
+/* Hero Section */
+.cs-hero {
+  padding: 80px 0;
+  background: linear-gradient(to bottom, #ffffff, #f3f4f6);
+}
+
+.cs-hero-inner {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.cs-hero-content {
+  max-width: 620px;
+}
+
+.cs-hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 16px;
+}
+
+.cs-hero-subtitle {
+  font-size: 18px;
+  color: #4b5563;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.cs-hero-actions {
+  display: flex;
+  gap: 16px;
+}
+
+/* Features */
+.cs-section {
+  padding: 60px 0;
+}
+
+.cs-section-title {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+.cs-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.cs-feature-card {
+  background: white;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+}
+
+.cs-feature-icon {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+
+.cs-feature-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.cs-feature-text {
+  font-size: 15px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* Feature Icon Colors */
+.cs-feature-icon-green {
+  color: #22c55e;
+}
+.cs-feature-icon-blue {
+  color: #3b82f6;
+}
+.cs-feature-icon-purple {
+  color: #8b5cf6;
+}
+
+/* CTA */
+.cs-section-cta {
+  padding: 80px 0;
   text-align: center;
+  background: linear-gradient(135deg, #dcfce7, #ffffff);
+  border-radius: 30px;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.cs-cta-inner {
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.cs-cta-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.cs-cta-subtitle {
+  font-size: 17px;
+  color: #4b5563;
+  margin-bottom: 20px;
+}
+
+/* Footer */
+.cs-footer {
+  text-align: center;
+  padding: 40px 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ================================
+   AUTH PAGES — LOGIN / REGISTER
+================================ */
+
+/* Light green background area (left side) */
+.cs-main-auth-bg {
+  background: linear-gradient(to bottom, #e8fdf0, #f4fff8);
+  min-height: calc(100vh - 80px);
+  padding-top: 60px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+/* Auth Wrapper */
+.cs-auth-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+/* Auth Card */
+.cs-auth-card {
+  background: white;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 460px;
+}
+
+.cs-auth-card-wide {
+  max-width: 620px;
+}
+
+/* Logo */
+.cs-auth-logo {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #0f172a;
+}
+
+/* Title + Subtitle */
+.cs-auth-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.cs-auth-subtitle {
+  font-size: 15px;
+  color: #64748b;
+  margin-bottom: 30px;
+}
+
+/* Grid layouts */
+.cs-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.cs-grid-2-span {
+  grid-column: span 2;
+}
+
+.cs-grid-2-inner {
+  display: flex;
+  gap: 12px;
+}
+
+/* Input fields */
+.cs-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-field-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+
+.cs-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  font-size: 15px;
+}
+
+.cs-input:focus {
+  outline: none;
+  border-color: #4ade80;
+  box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.2);
+}
+
+/* Goal timeframe row */
+.cs-goal-time-row {
+  display: flex;
+  gap: 12px;
+}
+
+.cs-goal-time-unit {
+  width: 130px;
+}
+
+/* Daily target box */
+.cs-daily-target {
+  background: #f8fafc;
+  border-left: 4px solid #22c55e;
+  padding: 18px 16px;
+  border-radius: 12px;
+}
+
+.cs-daily-target-strong {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.cs-daily-target-note {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Error text */
+.cs-error-text {
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+/* Footer text */
+.cs-auth-footer-text {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.cs-auth-footer-text a {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* ================================
+   DASHBOARD LAYOUT
+================================ */
+
+.cs-dashboard-root {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.cs-dashboard-grid {
+  display: grid;
+  grid-template-columns: 330px 1fr;
+  gap: 32px;
+}
+
+/* Left column + right column */
+.cs-dashboard-left,
+.cs-dashboard-right {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.cs-card {
+  background: white;
+  padding: 24px 28px;
+  border-radius: 20px;
+  box-shadow: 0px 2px 16px rgba(0, 0, 0, 0.04);
+}
+
+.cs-card h3 {
+  font-size: 20px;
+  margin-bottom: 14px;
+}
+
+.cs-card-subtitle {
+  color: #6b7280;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.cs-card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.cs-card-track {
+  background: linear-gradient(to right, #ecfdf5, #f6fff9);
+}
+
+.cs-card-track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cs-card-track-header h2 {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.cs-profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 16px;
+}
+
+.cs-profile-label {
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.cs-profile-target {
+  margin-top: 18px;
+  background: #f1f5f9;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 15px;
+}
+
+.cs-goal-progress-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cs-reco-list {
+  margin-top: 10px;
+  padding-left: 18px;
+}
+
+.cs-reco-list li {
+  margin-bottom: 8px;
+  color: #374151;
+}
+
+.cs-calendar-card {
+  padding-bottom: 30px;
+}
+
+.cs-calendar-header {
+  margin-bottom: 10px;
+}
+
+.cs-calendar-header-right {
+  text-align: right;
+}
+
+.cs-calendar-month {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.cs-calendar-total span {
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.cs-calendar-nav {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+  margin-bottom: 16px;
+}
+
+.cs-calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.cs-calendar-weekday {
+  padding: 4px 0;
+}
+
+.cs-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.cs-calendar-cell {
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 10px;
+  min-height: 70px;
+}
+
+.cs-calendar-cell-out {
+  background: #f1f5f9;
+  opacity: 0.45;
+}
+
+.cs-calendar-cell-day {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cs-calendar-cell-cal {
+  margin-top: 4px;
+  color: #16a34a;
+  font-size: 13px;
+}
+
+.cs-week-range {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+.cs-accuracy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.cs-accuracy-score {
+  font-size: 18px;
+  font-weight: 800;
+  color: #16a34a;
+}
+
+.cs-chart-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.cs-accuracy-message {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ================================
+   TRACK CALORIES (SEARCH + MANUAL + LIST)
+================================ */
+
+.cs-track-root {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.cs-track-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.cs-track-date {
+  color: #6b7280;
+  margin-bottom: 24px;
+}
+
+/* Two-column layout: left — Search/Manual, right — Meal List */
+.cs-track-grid {
+  display: grid;
+  grid-template-columns: 1.7fr 1.3fr;
+  gap: 28px;
+}
+
+@media (max-width: 900px) {
+  .cs-track-grid {
+    grid-template-columns: 1fr;
   }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.cs-search-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 6px;
+  margin-bottom: 16px;
 }
 
-.card {
-  padding: 2em;
+/* Search results container */
+.cs-search-results {
+  margin-top: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: white;
 }
 
-.read-the-docs {
-  color: #888;
+/* Single food item */
+.cs-search-item {
+  padding: 12px 14px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
+.cs-search-item:last-child {
+  border-bottom: none;
+}
+
+.cs-search-item-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.cs-search-item-sub {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.cs-manual-form {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cs-field-qty {
+  margin-top: 4px;
+}
+
+.cs-qty-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-qty-row button {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+}
+
+.cs-meal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+/* Each food entry */
+.cs-meal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Portion/quantity input field */
+.cs-input-qty {
+  width: 52px;
+  text-align: center;
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.cs-meal-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cs-empty-state {
+  text-align: center;
+  padding: 40px 0;
+  color: #6b7280;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+
+
