@@ -198,7 +198,7 @@ export default function TrackCaloriesPage() {
           </div>
         </div>
 
-        {/* 右邊：Today's Meal List */}
+        {/* Right Side：Today's Meal List */}
         <div className="cs-card">
           <div className="cs-card-header-row">
             <div>

@@ -1,7 +1,5 @@
 // src/services/mockApi.js
 
-// 簡單以 localStorage / 假資料模擬 API
-
 export async function mockLogin({ email, password }) {
   await delay(400);
   if (!email || !password) {
@@ -48,7 +46,7 @@ export function getMockProfile() {
   };
 }
 
-// 月曆 mock
+// Calendar mock
 export function getMockMonthlyCalendar(offset = 0) {
   const today = new Date();
   const targetMonth = new Date(today.getFullYear(), today.getMonth() + offset, 1);
@@ -74,7 +72,7 @@ export function getMockMonthlyCalendar(offset = 0) {
 
     let dayTotal = 0;
     if (inMonth) {
-      // 模擬 1200–2400 之間的數字
+      // Mock number between 1200–2400 
       dayTotal = Math.round(1200 + Math.random() * 1200);
       total += dayTotal;
     }
@@ -88,7 +86,7 @@ export function getMockMonthlyCalendar(offset = 0) {
 // Weekly trend mock
 export function getMockWeeklyTrend(offsetWeeks = 0) {
   const baseDate = new Date();
-  baseDate.setDate(baseDate.getDate() - baseDate.getDay()); // 上一個 Sunday
+  baseDate.setDate(baseDate.getDate() - baseDate.getDay()); // Last Sunday
 
   const points = [];
   const daysShort = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -117,17 +115,17 @@ export function getMockWeeklyTrend(offsetWeeks = 0) {
   return { rangeLabel, accuracy, points };
 }
 
-// Track Calories：今日的空清單
+// Track Calories：Today's Blank List
 export function createEmptyMealListForToday() {
   const today = new Date().toISOString().substring(0, 10);
   return { date: today, items: [] };
 }
 
-// Nutritionix 搜尋 mock
+// Nutritionix Search mock
 export async function mockSearchFood(query) {
   await delay(300);
   if (!query) return [];
-  // 模擬三個固定結果
+  // Mock 3 Fit Result
   return [
     {
       id: '1',

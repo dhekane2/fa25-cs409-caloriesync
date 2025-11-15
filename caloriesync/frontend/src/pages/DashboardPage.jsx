@@ -41,7 +41,7 @@ export default function DashboardPage() {
   return (
     <div className="cs-dashboard-root cs-container">
       <div className="cs-dashboard-grid">
-        {/* 左側：Track calories shortcut + Profile + Goal Progress + Recommendations */}
+        {/* Left Side：Track calories shortcut + Profile + Goal Progress + Recommendations */}
         <div className="cs-dashboard-left">
           <section className="cs-card cs-card-track">
             <div className="cs-card-track-header">
@@ -136,7 +136,7 @@ export default function DashboardPage() {
           </section>
         </div>
 
-        {/* 右側：Monthly calendar + weekly trend */}
+        {/* Right Side：Monthly calendar + weekly trend */}
         <div className="cs-dashboard-right">
           <section className="cs-card cs-calendar-card">
             <div className="cs-card-header-row cs-calendar-header">

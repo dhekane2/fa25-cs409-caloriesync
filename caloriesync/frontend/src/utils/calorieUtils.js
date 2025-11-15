@@ -1,4 +1,4 @@
-// 粗略版：用體重差 * 7700 / 天數 + 基礎維持熱量估計
+// Rough estimate: (weight difference * 7700) / number of days + estimated maintenance calories
 export function calculateDailyTargetCalories(
   currentWeight,
   goalWeight,
@@ -24,11 +24,11 @@ export function calculateDailyTargetCalories(
       days = timeValue * 30;
   }
 
-  const diffKg = currentWeight - goalWeight; // 正值=減重
+  const diffKg = currentWeight - goalWeight; // Positive value means weight minimus
   const totalCalChange = diffKg * 7700;
   const dailyChange = totalCalChange / days;
 
-  // 非嚴格 BMR，只是粗略計算
+// Not a strict BMR calculation — this is only a rough estimate
   const base = gender === 'female' ? 1400 : 1600;
   const ageAdj = age > 30 ? (age - 30) * 5 : 0;
 
