@@ -1,8 +1,10 @@
 .vscode
 
 # Node modules
+node_modules/
 caloriesync/frontend/node_modules
 caloriesync/backend/node_modules
+
 
 # Environment files
 caloriesync/backend/.env
