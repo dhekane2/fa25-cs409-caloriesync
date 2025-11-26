@@ -8,6 +8,8 @@ import User from "./models/User.js";
 import Meal from "./models/Meal.js";
 import MealItem from "./models/MealItem.js";
 
+// test auth
+
 dotenv.config();
 
 const app = express();
