@@ -3,6 +3,11 @@ import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 
+// Import entities
+import User from "./models/User.js";
+import Meal from "./models/Meal.js";
+import MealItem from "./models/MealItem.js";
+
 dotenv.config();
 
 const app = express();
