@@ -1,26 +1,49 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from 'cookie-parser';
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-
-// Import entities
-import User from "./models/User.js";
-import Meal from "./models/Meal.js";
-import MealItem from "./models/MealItem.js";
-
-// test auth
-
 dotenv.config();
 
+// configs
+import { corsOptions } from "./config/corsOption.js";
+
+// Import entities
+
+// auth routes
+import authRouter from "./routes/auth.js";
+import apiRouter from "./routes/index.js";
+import { authenticateJWT } from './middlewares/authMiddleware.js';
+
+
+// ####################################### 
+// ####################################### 
+
 const app = express();
-app.use(cors({ origin: ["http://localhost:5173"], credentials: true }));
+const PORT = process.env.PORT || 4000;
+
+// #######################################
+// middlewares
+// #######################################  
+app.use(cors(corsOptions));
+app.use(cookieParser());
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-app.get("/health", (req, res) => {
-  res.json({ ok: true, service: "calorisync-api" });
-});
 
-const PORT = process.env.PORT || 4000;
+// #######################################
+// Routes
+// #######################################  
+app.use('/auth', authRouter);
+// Apply authentication middleware for all API routes mounted after this line.
+// This keeps authentication logic separate from auth routes (login/register/refresh).
+app.use(authenticateJWT);
+
+// this is a test api
+app.use('/user', apiRouter);
+
+// write dashboard and track apis here..
+
 
 async function startServer() {
   try {
@@ -34,4 +57,6 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+
 startServer();

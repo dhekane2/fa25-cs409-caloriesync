@@ -61,4 +61,14 @@ userSchema.pre('save', function(next) {
   next();
 });
 
+// store refresh tokens for issued refresh tokens (simple approach)
+// store a single refresh token per user (overwrite on login/register)
+userSchema.add({
+  refresh_token: {
+    type: String,
+    required: false,
+    default: null
+  }
+});
+
 export default mongoose.model('User', userSchema);
