@@ -8,11 +8,10 @@ dotenv.config();
 // configs
 import { corsOptions } from "./config/corsOption.js";
 
-// Import entities
-
 // auth routes
 import authRouter from "./routes/auth.js";
 import apiRouter from "./routes/index.js";
+import mealRouter from "./routes/meal.js";
 import { authenticateJWT } from './middlewares/authMiddleware.js';
 
 
@@ -42,7 +41,8 @@ app.use(authenticateJWT);
 // this is a test api
 app.use('/user', apiRouter);
 
-// write dashboard and track apis here..
+// Meal logging and tracking APIs
+app.use('/meals', mealRouter);
 
 
 async function startServer() {

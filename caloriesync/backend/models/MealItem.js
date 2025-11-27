@@ -1,11 +1,7 @@
 import mongoose from "mongoose";
 
 const mealItemSchema = new mongoose.Schema({
-  meal_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Meal',
-    required: true
-  },
+  
   item_name: {
     type: String,
     required: true,

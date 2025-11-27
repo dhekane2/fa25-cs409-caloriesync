@@ -24,7 +24,6 @@ const userSchema = new mongoose.Schema({
   },
   phone_number: {
     type: String,
-    required: false,
     trim: true
   },
   age: {
@@ -47,28 +46,25 @@ const userSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
-  updated_at: {
-    type: Date,
-    default: Date.now
-  }
-}, {
-  timestamps: true 
-});
+  
+  goal_timeframe_value: { 
+    type: Number 
+  },
 
-
-userSchema.pre('save', function(next) {
-  this.updated_at = Date.now();
-  next();
-});
-
-// store refresh tokens for issued refresh tokens (simple approach)
-// store a single refresh token per user (overwrite on login/register)
-userSchema.add({
+  goal_timeframe_unit:  { 
+    type: String, 
+    enum: ["days", "weeks", "months"] 
+  },
+  
   refresh_token: {
     type: String,
     required: false,
     default: null
   }
+  
+}, {
+  timestamps: true 
 });
+
 
 export default mongoose.model('User', userSchema);
