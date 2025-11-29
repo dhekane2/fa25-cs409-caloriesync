@@ -12,6 +12,7 @@ import { corsOptions } from "./config/corsOption.js";
 import authRouter from "./routes/auth.js";
 import apiRouter from "./routes/index.js";
 import mealRouter from "./routes/meal.js";
+
 import { authenticateJWT } from './middlewares/authMiddleware.js';
 
 
