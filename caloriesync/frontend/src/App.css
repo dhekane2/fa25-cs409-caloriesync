@@ -131,24 +131,22 @@
 /* ================================
    LANDING PAGE
 ================================ */
+
 .cs-landing-root {
-  padding-top: 80px;
+  padding-top: 0;                 /* Keep top area aligned with header height */
+  background: #ffffff;
 }
 
-/* Hero Section */
+/* Hero Section: top light-green gradient with larger height */
 .cs-hero {
-  padding: 80px 0;
-  background: linear-gradient(to bottom, #ffffff, #f3f4f6);
+  padding: 96px 0 80px;
+  background: linear-gradient(to bottom, #ecfdf5 0%, #ffffff 65%);
 }
 
 .cs-hero-inner {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.cs-hero-content {
-  max-width: 620px;
+  max-width: 760px;
+  margin: 0 auto;
+  text-align: center;
 }
 
 .cs-hero-title {
@@ -156,111 +154,132 @@
   font-weight: 800;
   line-height: 1.2;
   margin-bottom: 16px;
+  color: #0f172a;
 }
 
 .cs-hero-subtitle {
   font-size: 18px;
   color: #4b5563;
-  margin-bottom: 24px;
-  line-height: 1.5;
+  line-height: 1.6;
+  max-width: 640px;
+  margin: 0 auto 24px;
 }
 
 .cs-hero-actions {
-  display: flex;
+  display: inline-flex;
   gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
-/* Features */
+/* Shared section spacing */
 .cs-section {
-  padding: 60px 0;
+  padding: 64px 0;
+}
+
+/* Features section: white background + 3 centered cards */
+.cs-section-features {
+  background: #ffffff;
 }
 
 .cs-section-title {
-  font-size: 26px;
+  text-align: center;
+  font-size: 28px;
   font-weight: 700;
   margin-bottom: 32px;
+  color: #0f172a;
 }
 
 .cs-feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 28px;
 }
 
 .cs-feature-card {
-  background: white;
-  border-radius: 14px;
-  padding: 24px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 24px 24px 22px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   border: 1px solid #e5e7eb;
 }
 
-.cs-feature-icon {
+/* Circular icon badge */
+.cs-feature-icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 24px;
-  margin-bottom: 12px;
+  margin: 0 auto 12px;
+}
+
+.cs-feature-icon-green {
+  background: #dcfce7;
+}
+
+.cs-feature-icon-blue {
+  background: #dbeafe;
+}
+
+.cs-feature-icon-purple {
+  background: #ede9fe;
 }
 
 .cs-feature-title {
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   margin-bottom: 6px;
 }
 
 .cs-feature-text {
-  font-size: 15px;
+  font-size: 14px;
   color: #6b7280;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 
-/* Feature Icon Colors */
-.cs-feature-icon-green {
-  color: #22c55e;
-}
-.cs-feature-icon-blue {
-  color: #3b82f6;
-}
-.cs-feature-icon-purple {
-  color: #8b5cf6;
-}
-
-/* CTA */
+/* CTA section: full-width gradient block at the bottom */
 .cs-section-cta {
-  padding: 80px 0;
-  text-align: center;
-  background: linear-gradient(135deg, #dcfce7, #ffffff);
-  border-radius: 30px;
+  padding: 72px 0;
+  background: linear-gradient(135deg, #22c55e, #2563eb);
+  color: #ffffff;
 }
 
 .cs-cta-inner {
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto;
+  text-align: center;
 }
 
 .cs-cta-title {
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 700;
   margin-bottom: 10px;
 }
 
 .cs-cta-subtitle {
-  font-size: 17px;
-  color: #4b5563;
-  margin-bottom: 20px;
+  font-size: 16px;
+  margin-bottom: 22px;
+  color: #e5e7eb;
 }
 
-/* Footer */
+/* Footer with dark background (like Figma design #2) */
 .cs-footer {
+  background: #020617;
+  color: #9ca3af;
   text-align: center;
-  padding: 40px 0;
-  color: #6b7280;
-  font-size: 14px;
+  padding: 20px 0;
+  font-size: 13px;
 }
 
 /* ================================
    AUTH PAGES — LOGIN / REGISTER
 ================================ */
 
-/* Light green background area (left side) */
+/* Left-side light-green background */
 .cs-main-auth-bg {
   background: linear-gradient(to bottom, #e8fdf0, #f4fff8);
   min-height: calc(100vh - 80px);
@@ -270,15 +289,50 @@
   justify-content: center;
 }
 
-/* Auth Wrapper */
+/* Outer wrapper: center the page; header on top and card below */
 .cs-auth-wrapper {
   width: 100%;
+  max-width: 960px;
   display: flex;
-  justify-content: center;
-  padding: 40px 16px;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px 60px;
 }
 
-/* Auth Card */
+/* Register-only header (logo + title outside the card) */
+.cs-register-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.cs-register-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #16a34a;
+  margin-bottom: 8px;
+}
+
+.cs-register-logo-mark {
+  font-size: 24px;
+}
+
+.cs-register-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 4px;
+  color: #0f172a;
+}
+
+.cs-register-subtitle {
+  font-size: 14px;
+  color: #64748b;
+}
+
+/* Auth card container (shared by Login / Register) */
 .cs-auth-card {
   background: white;
   padding: 40px;
@@ -289,10 +343,10 @@
 }
 
 .cs-auth-card-wide {
-  max-width: 620px;
+  max-width: 640px;
 }
 
-/* Logo */
+/* Old logo/title classes used inside Login (kept to avoid breaking layout) */
 .cs-auth-logo {
   font-size: 20px;
   font-weight: 700;
@@ -300,7 +354,6 @@
   color: #0f172a;
 }
 
-/* Title + Subtitle */
 .cs-auth-title {
   font-size: 32px;
   font-weight: 800;
@@ -341,12 +394,24 @@
   margin-bottom: 6px;
 }
 
+/* Allow Goal Timeframe label to include an icon */
+.cs-field-label-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cs-field-label-icon {
+  font-size: 15px;
+}
+
 .cs-input {
   width: 100%;
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid #e5e7eb;
   font-size: 15px;
+  background: #f9fafb;       /* Light gray background to match your reference design */
 }
 
 .cs-input:focus {
@@ -365,7 +430,7 @@
   width: 130px;
 }
 
-/* Daily target box */
+/* Daily target info box */
 .cs-daily-target {
   background: #f8fafc;
   border-left: 4px solid #22c55e;
@@ -392,7 +457,7 @@
   border-radius: 8px;
 }
 
-/* Footer text */
+/* Footer text under auth card */
 .cs-auth-footer-text {
   text-align: center;
   margin-top: 20px;
@@ -420,7 +485,7 @@
   gap: 32px;
 }
 
-/* Left column + right column */
+/* Left and right columns */
 .cs-dashboard-left,
 .cs-dashboard-right {
   display: flex;
@@ -740,6 +805,3 @@
   line-height: 1.5;
   font-size: 15px;
 }
-
-
-
