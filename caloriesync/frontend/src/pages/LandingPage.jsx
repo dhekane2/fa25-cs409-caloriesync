@@ -43,7 +43,7 @@ export default function LandingPage() {
       {/* Features section: three centered feature cards */}
       <section className="cs-section cs-section-features">
         <div className="cs-container">
-          <h2 className="cs-section-title">Everything You Need to Succeed</h2>
+          <h2 className="cs-section-title">Everything You Need to Succeed in your Journey</h2>
 
           <div className="cs-feature-grid">
             <div className="cs-feature-card">
