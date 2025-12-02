@@ -14,3 +14,5 @@ caloriesync/frontend/.env
 caloriesync/frontend/dist
 caloriesync/backend/logs
 *.log
+
+.env

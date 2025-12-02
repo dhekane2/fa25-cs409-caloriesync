@@ -11,6 +11,9 @@ export default function TrackCaloriesPage() {
   const [manualName, setManualName] = useState('');
   const [manualCalories, setManualCalories] = useState('');
   const [manualQty, setManualQty] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
 
   const totalCalories = mealList.items.reduce(
     (sum, item) => sum + item.calories,
@@ -85,6 +88,37 @@ export default function TrackCaloriesPage() {
       items: prev.items.filter((i) => i.id !== id),
     }));
   };
+
+  const handleSubmitMeal = async () => {
+    if (mealList.items.length === 0) {
+      setSubmitError('Please add at least one item before submitting.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+    setSubmitSuccess(false);
+
+    try {
+      // TODO: Replace with actual API call when backend is ready
+      // const result = await logMeal(mealList.items);
+      
+      // For now, simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Clear the meal list on success
+      setMealList(createEmptyMealListForToday());
+      setSubmitSuccess(true);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (err) {
+      setSubmitError(err.message || 'Failed to submit meal. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="cs-container cs-track-root">
@@ -217,6 +251,7 @@ export default function TrackCaloriesPage() {
               Search for foods or add manual entries to get started.
             </div>
           ) : (
+            <>
             <div className="cs-meal-list">
               {mealList.items.map((item) => (
                 <div key={item.id} className="cs-meal-item">
@@ -252,6 +287,41 @@ export default function TrackCaloriesPage() {
                 </div>
               ))}
             </div>
+                    {/* Submit Meal Button Section */}
+                    <div style={{ 
+                marginTop: '1.5rem', 
+                paddingTop: '1.5rem', 
+                borderTop: '1px solid #e0e0e0' 
+              }}>
+                {submitError && (
+                  <div className="cs-error-text" style={{ marginBottom: '0.75rem' }}>
+                    {submitError}
+                  </div>
+                )}
+                {submitSuccess && (
+                  <div style={{ 
+                    color: '#10b981', 
+                    marginBottom: '0.75rem',
+                    fontSize: '0.875rem',
+                    fontWeight: '500'
+                  }}>
+                    ✓ Meal submitted successfully!
+                  </div>
+                )}
+                <button
+                  type="button"
+                  className="cs-btn cs-btn-dark cs-btn-full"
+                  onClick={handleSubmitMeal}
+                  disabled={isSubmitting || mealList.items.length === 0}
+                  style={{
+                    opacity: (isSubmitting || mealList.items.length === 0) ? 0.6 : 1,
+                    cursor: (isSubmitting || mealList.items.length === 0) ? 'not-allowed' : 'pointer'
+                  }}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Meal'}
+                </button>
+              </div>
+            </>
           )}
         </div>
       </div>
