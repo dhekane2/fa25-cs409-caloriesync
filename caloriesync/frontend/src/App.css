@@ -133,7 +133,7 @@
 ================================ */
 
 .cs-landing-root {
-  padding-top: 0;                 /* Keep top area aligned with header height */
+  padding-top: 0; /* Align the top area with header height */
   background: #ffffff;
 }
 
@@ -177,7 +177,7 @@
   padding: 64px 0;
 }
 
-/* Features section: white background + 3 centered cards */
+/* Features section: white background & 3 centered cards */
 .cs-section-features {
   background: #ffffff;
 }
@@ -266,7 +266,7 @@
   color: #e5e7eb;
 }
 
-/* Footer with dark background (like Figma design #2) */
+/* Footer with dark background */
 .cs-footer {
   background: #020617;
   color: #9ca3af;
@@ -279,27 +279,27 @@
    AUTH PAGES — LOGIN / REGISTER
 ================================ */
 
-/* Left-side light-green background */
+/* Green background for Login / Register pages */
 .cs-main-auth-bg {
   background: linear-gradient(to bottom, #e8fdf0, #f4fff8);
-  min-height: calc(100vh - 80px);
-  padding-top: 60px;
+  min-height: 100vh;
+  padding: 60px 0 60px;
   display: flex;
   align-items: flex-start;
   justify-content: center;
 }
 
-/* Outer wrapper: center the page; header on top and card below */
+/* Center wrapper: shared by Login & Register */
 .cs-auth-wrapper {
   width: 100%;
-  max-width: 960px;
+  max-width: 960px; /* overall content width */
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px 16px 60px;
 }
 
-/* Register-only header (logo + title outside the card) */
+/* Header used for both pages */
 .cs-register-header {
   text-align: center;
   margin-bottom: 24px;
@@ -332,21 +332,87 @@
   color: #64748b;
 }
 
-/* Auth card container (shared by Login / Register) */
+/* Base authentication card */
 .cs-auth-card {
   background: white;
   padding: 40px;
   border-radius: 20px;
   box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.06);
   width: 100%;
-  max-width: 460px;
 }
 
+/* Wide card used by both Register & Login */
 .cs-auth-card-wide {
-  max-width: 640px;
+  max-width: 960px; /* same as wrapper for balanced appearance */
+  width: 100%;
+  margin: 0 auto;
 }
 
-/* Old logo/title classes used inside Login (kept to avoid breaking layout) */
+/* ---------- Login-specific layout ---------- */
+
+/* Outer wrapper for Login: controls overall block width */
+.cs-login-wrapper {
+  width: 100%;
+  max-width: 960px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px 60px;
+}
+
+/* Login card: slightly larger and more spacious */
+.cs-login-card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0px 4px 28px rgba(0, 0, 0, 0.07);
+  padding: 84px 96px; /* large comfortable spacing */
+  width: 100%;
+  max-width: 980px; /* bigger card */
+  margin: 0 auto;
+  transition: width 0.25s ease;
+}
+
+/* Larger field labels for Login */
+.cs-login-card .cs-field-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Larger input fields */
+.cs-login-card .cs-input {
+  font-size: 17px;
+  padding: 14px 18px;
+  border-radius: 12px;
+}
+
+/* Larger Login button */
+.cs-login-card .cs-btn {
+  font-size: 18px;
+  padding: 16px 0;
+  border-radius: 12px;
+}
+
+/* Vertical layout with spacing */
+.cs-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* Expand login button to full width */
+.cs-btn-full {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .cs-login-card {
+    padding: 40px 32px;
+    max-width: 95%;
+  }
+}
+
+/* Old logo/title classes (kept for compatibility) */
 .cs-auth-logo {
   font-size: 20px;
   font-weight: 700;
@@ -382,7 +448,7 @@
   gap: 12px;
 }
 
-/* Input fields */
+/* Input field wrapper */
 .cs-field {
   display: flex;
   flex-direction: column;
@@ -394,7 +460,7 @@
   margin-bottom: 6px;
 }
 
-/* Allow Goal Timeframe label to include an icon */
+/* Field label row with icon */
 .cs-field-label-row {
   display: inline-flex;
   align-items: center;
@@ -411,7 +477,7 @@
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   font-size: 15px;
-  background: #f9fafb;       /* Light gray background to match your reference design */
+  background: #f9fafb;
 }
 
 .cs-input:focus {
@@ -430,7 +496,7 @@
   width: 130px;
 }
 
-/* Daily target info box */
+/* Daily calorie target box */
 .cs-daily-target {
   background: #f8fafc;
   border-left: 4px solid #22c55e;
@@ -449,7 +515,7 @@
   color: #6b7280;
 }
 
-/* Error text */
+/* Error message */
 .cs-error-text {
   color: #dc2626;
   background: #fee2e2;
@@ -692,7 +758,7 @@
   margin-bottom: 24px;
 }
 
-/* Two-column layout: left — Search/Manual, right — Meal List */
+/* Two-column layout: left — Search / Manual entry, right — Meal list */
 .cs-track-grid {
   display: grid;
   grid-template-columns: 1.7fr 1.3fr;
@@ -784,7 +850,7 @@
   align-items: center;
 }
 
-/* Portion/quantity input field */
+/* Quantity input field */
 .cs-input-qty {
   width: 52px;
   text-align: center;
