@@ -1,3 +1,4 @@
+// src/pages/DashboardPage.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -50,7 +51,26 @@ function getPerformanceLevel(accuracy) {
   if (accuracy >= 90) return 'Excellent';
   if (accuracy >= 75) return 'Good';
   if (accuracy >= 60) return 'Needs Improvement';
-  return 'Far from goal';
+  return 'Far from Goal';
+}
+
+/** accuracy vs dailyTarget, based on actual weekly points */
+function computeDynamicAccuracy(profile, weekData) {
+  const target = profile?.dailyTarget || 0;
+  const points = weekData?.points || [];
+
+  if (!target || !points.length) {
+    return weekData.accuracy || 0;
+  }
+
+  const avgAbsDiff =
+    points.reduce(
+      (sum, p) => sum + Math.abs((p.actual ?? 0) - target),
+      0,
+    ) / points.length;
+
+  const rawAcc = 100 - (avgAbsDiff / target) * 100;
+  return Math.max(0, Math.min(100, Math.round(rawAcc)));
 }
 
 export default function DashboardPage() {
@@ -189,7 +209,34 @@ export default function DashboardPage() {
   const daysRemaining = getGoalDays(goalTf.value, goalTf.unit);
   const goalTimeLabel = profile?.goalTimeframe || '';
 
-  const performanceLevel = getPerformanceLevel(weekData.accuracy || 0);
+  // dynamic accuracy based on updated target + weekly data
+  const accuracy = computeDynamicAccuracy(profile, weekData);
+  const performanceLevel = getPerformanceLevel(accuracy);
+
+  // recommendations + message based on performance
+  let performanceMessage = "Not bad, but there's room for improvement.";
+  let recos = [
+    'Log meals consistently every day to improve your trend data.',
+    'Double-check portions for your highest-calorie meals.',
+    'Look for one snack per day you could replace with a lighter option.',
+  ];
+
+  if (performanceLevel === 'Excellent' || performanceLevel === 'Good') {
+    performanceMessage = "Good job! You're on the right track.";
+    recos = [
+      "You're doing well! Small tweaks can improve accuracy further.",
+      'Try meal prepping to better control portion sizes.',
+      'Review days when you went over/under target to identify patterns.',
+    ];
+  } else if (performanceLevel === 'Far from Goal') {
+    performanceMessage =
+      "Don't get discouraged—building healthy habits takes time!";
+    recos = [
+      "Don't get discouraged—building healthy habits takes time!",
+      'Start with small, achievable daily calorie targets.',
+      'Track every meal and snack to understand your eating patterns.',
+    ];
+  }
 
   /* ---------- calendar → track navigation ---------- */
 
@@ -224,7 +271,7 @@ export default function DashboardPage() {
       {/* Main dashboard content */}
       <div className="cs-container cs-dashboard-root">
         <div className="cs-dashboard-grid">
-          {/* Left Side: Track calories shortcut + Profile + Goal Progress + Recommendations */}
+          {/* Left Side: Track calories shortcut + Profile + Goal Progress */}
           <div className="cs-dashboard-left">
             {/* Track Calories gradient card */}
             <section
@@ -389,7 +436,7 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ) : (
-                  /* VIEW MODE (what you had, but using updated goal info) */
+                  /* VIEW MODE */
                   <>
                     <div className="cs-profile-grid">
                       <div>
@@ -438,51 +485,66 @@ export default function DashboardPage() {
               </section>
             )}
 
-            {/* Goal progress card */}
+            {/* Goal progress card – new 3-box UI */}
             <section className="cs-card cs-goal-card">
-              <h3>Goal Progress</h3>
+              <div className="cs-goal-header">
+                <div className="cs-goal-header-icon">🎯</div>
+                <h3>Goal Progress</h3>
+              </div>
 
-              <div className="cs-goal-progress-row cs-goal-row-highlight">
+              {/* Days remaining / timeframe box */}
+              <div className="cs-goal-box cs-goal-box-top">
                 <div>
-                  <div className="cs-profile-label">Days Remaining</div>
-                  <div className="cs-goal-number">
+                  <div className="cs-goal-label">Days Remaining</div>
+                  <div className="cs-goal-main-number">
                     {daysRemaining ?? '--'}
                   </div>
                 </div>
                 <div className="cs-goal-text-right">
-                  <div className="cs-profile-label">Goal Timeframe</div>
-                  <div>{goalTimeLabel || '--'}</div>
+                  <div className="cs-goal-label">Goal Timeframe</div>
+                  <div className="cs-goal-text">
+                    {goalTimeLabel || '--'}
+                  </div>
                 </div>
               </div>
 
-              <div className="cs-goal-progress-row">
+              {/* Current accuracy box */}
+              <div className="cs-goal-box">
                 <div>
-                  <div className="cs-profile-label">Current Accuracy</div>
-                  <div className="cs-goal-number">
-                    {weekData.accuracy}%
+                  <div className="cs-goal-label">Current Accuracy</div>
+                  <div className="cs-goal-main-number">
+                    {accuracy}%
                   </div>
                 </div>
                 <div className="cs-goal-text-right">
-                  <div className="cs-profile-label">Performance Level</div>
-                  <div>{performanceLevel}</div>
+                  <div className="cs-goal-label">Daily Target</div>
+                  <div className="cs-goal-text">
+                    {profile
+                      ? `${profile.dailyTarget.toLocaleString()} cal/day`
+                      : '--'}
+                  </div>
                 </div>
               </div>
 
-              <div className="cs-goal-badge">
-                Keep logging consistently to improve your accuracy.
+              {/* Performance level box */}
+              <div className="cs-goal-box cs-goal-box-bottom">
+                <div>
+                  <div className="cs-goal-label">Performance Level</div>
+                  <div className="cs-goal-performance">
+                    {performanceLevel}
+                  </div>
+                </div>
               </div>
-            </section>
 
-            {/* Recommendations card */}
-            <section className="cs-card cs-reco-card">
-              <h3>Recommendations</h3>
+              {/* Recommendations inside goal card */}
+              <div className="cs-goal-reco-header">
+                <span className="cs-goal-reco-icon">💡</span>
+                <span className="cs-goal-reco-title">Recommendations</span>
+              </div>
               <ul className="cs-reco-list">
-                <li>Focus on planning meals ahead of time.</li>
-                <li>Use measuring tools to ensure accurate portion sizes.</li>
-                <li>
-                  Identify your trigger foods and find healthier
-                  alternatives.
-                </li>
+                {recos.map((r) => (
+                  <li key={r}>{r}</li>
+                ))}
               </ul>
             </section>
           </div>
@@ -541,12 +603,12 @@ export default function DashboardPage() {
                 <div className="cs-accuracy">
                   <span className="cs-profile-label">Accuracy Score</span>
                   <span className="cs-accuracy-score">
-                    {weekData.accuracy}%
+                    {accuracy}%
                   </span>
                 </div>
               </div>
 
-              {/* New week nav row */}
+              {/* week nav row */}
               <div className="cs-week-nav-row">
                 <button
                   className="cs-btn cs-btn-xs cs-btn-outline"
@@ -605,9 +667,7 @@ export default function DashboardPage() {
               </div>
 
               <div className="cs-accuracy-message cs-accuracy-message-good">
-                {weekData.accuracy >= 75
-                  ? "Good job! You're on the right track."
-                  : "Not bad, but there's room for improvement."}
+                {performanceMessage}
               </div>
             </section>
           </div>

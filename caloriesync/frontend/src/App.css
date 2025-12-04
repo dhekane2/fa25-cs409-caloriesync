@@ -754,52 +754,114 @@
 /* Goal progress */
 .cs-goal-card {
   border-left: 4px solid #22c55e;
+  padding-top: 20px;
+  padding-bottom: 20px;
 }
 
-.cs-goal-progress-row {
+.cs-goal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.cs-goal-header-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.cs-goal-box {
+  border-radius: 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  padding: 14px 16px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 12px;
 }
 
-.cs-goal-row-highlight {
+.cs-goal-box-top {
   background: #eff6ff;
-  border-radius: 12px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
+  border-color: #bfdbfe;
 }
 
-.cs-goal-number {
-  font-size: 22px;
+.cs-goal-box-bottom {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.cs-goal-label {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.cs-goal-main-number {
+  font-size: 26px;
   font-weight: 700;
+  color: #1d4ed8;
 }
 
-.cs-goal-text-right {
+.cs-goal-right-text {
   text-align: right;
 }
 
-.cs-goal-badge {
-  margin-top: 10px;
-  font-size: 13px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  background: #f3f4ff;
-  color: #4b5563;
+.cs-goal-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
 }
 
-/* Recommendations */
-.cs-reco-card h3 {
+.cs-goal-performance {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cs-goal-performance-good {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.cs-goal-performance-ok {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.cs-goal-performance-bad {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+/* Recommendations title row */
+.cs-goal-reco-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
   margin-bottom: 6px;
 }
 
-.cs-reco-list {
-  margin-top: 10px;
-  padding-left: 18px;
+.cs-goal-reco-icon {
+  font-size: 18px;
 }
 
-.cs-reco-list li {
-  margin-bottom: 8px;
-  color: #374151;
+.cs-goal-reco-title {
+  font-weight: 600;
 }
 
 /* Calendar card */
