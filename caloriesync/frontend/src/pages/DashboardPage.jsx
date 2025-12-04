@@ -155,50 +155,79 @@ export default function DashboardPage() {
     }));
   };
 
-  const handleProfileSave = () => {
-    if (!profile || !profileForm) return;
+const handleProfileSave = () => {
+  if (!profile || !profileForm) return;
 
-    const goalTimeValueNum = parseFloat(profileForm.goalTimeValue) || 0;
-    const goalTimeUnit = profileForm.goalTimeUnit || 'month';
+  const goalTimeValueNum = parseFloat(profileForm.goalTimeValue) || 0;
+  const goalTimeUnit = profileForm.goalTimeUnit || 'month';
 
-    const updated = {
-      ...profile,
-      name: profileForm.name.trim() || profile.name,
-      email: profileForm.email.trim() || profile.email,
-      phone: profileForm.phone.trim(),
-      age: Number(profileForm.age) || profile.age,
-      gender: profileForm.gender || profile.gender,
-      currentWeight:
-        Number(profileForm.currentWeight) || profile.currentWeight,
-      goalWeight: Number(profileForm.goalWeight) || profile.goalWeight,
-      goalTimeValue: goalTimeValueNum || profile.goalTimeValue,
-      goalTimeUnit,
+  const updated = {
+    ...profile,
+    name: profileForm.name.trim() || profile.name,
+    email: profileForm.email.trim() || profile.email,
+    phone: profileForm.phone.trim(),
+    age: Number(profileForm.age) || profile.age,
+    gender: profileForm.gender || profile.gender,
+    currentWeight:
+      Number(profileForm.currentWeight) || profile.currentWeight,
+    goalWeight: Number(profileForm.goalWeight) || profile.goalWeight,
+    goalTimeValue: goalTimeValueNum || profile.goalTimeValue,
+    goalTimeUnit,
+  };
+
+  if (updated.goalTimeValue && updated.goalTimeUnit) {
+    const unitLabel =
+      updated.goalTimeUnit === 'day'
+        ? 'days'
+        : updated.goalTimeUnit === 'week'
+        ? 'weeks'
+        : 'months';
+    updated.goalTimeframe = `${updated.goalTimeValue} ${unitLabel}`;
+  }
+
+  // Recalculate daily target using helper
+  updated.dailyTarget = calculateDailyTargetCalories(
+    updated.currentWeight,
+    updated.goalWeight,
+    updated.goalTimeValue,
+    updated.goalTimeUnit,
+    updated.age,
+    updated.gender,
+    updated.height,
+  );
+
+  // 1) Update React state so the UI changes immediately
+  setProfile(updated);
+  setIsEditingProfile(false);
+
+  // 2) Persist to localStorage so future visits use the new goal
+  try {
+    const raw = localStorage.getItem('cs_profile');
+    const stored = raw ? JSON.parse(raw) : {};
+
+    const updatedStored = {
+      ...stored,
+      // fields used by getMockProfile
+      name: updated.name,
+      email: updated.email,
+      phone: updated.phone,
+      age: updated.age,
+      gender: updated.gender,
+      height: updated.height,
+      // note: getMockProfile reads `weight` for current weight
+      weight: updated.currentWeight,
+      goalWeight: updated.goalWeight,
+      goalTimeValue: updated.goalTimeValue,
+      goalTimeUnit: updated.goalTimeUnit,
+      goalTimeframe: updated.goalTimeframe,
+      dailyTarget: updated.dailyTarget,
     };
 
-    if (updated.goalTimeValue && updated.goalTimeUnit) {
-      const unitLabel =
-        updated.goalTimeUnit === 'day'
-          ? 'days'
-          : updated.goalTimeUnit === 'week'
-          ? 'weeks'
-          : 'months';
-      updated.goalTimeframe = `${updated.goalTimeValue} ${unitLabel}`;
-    }
-
-    // recalc daily target using helper
-    updated.dailyTarget = calculateDailyTargetCalories(
-      updated.currentWeight,
-      updated.goalWeight,
-      updated.goalTimeValue,
-      updated.goalTimeUnit,
-      updated.age,
-      updated.gender,
-      updated.height,
-    );
-
-    setProfile(updated);
-    setIsEditingProfile(false);
-  };
+    localStorage.setItem('cs_profile', JSON.stringify(updatedStored));
+  } catch (err) {
+    console.error('Failed to persist profile to localStorage', err);
+  }
+};
 
   /* ---------- derived goal progress values ---------- */
 
