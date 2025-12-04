@@ -172,7 +172,8 @@ export default function DashboardPage() {
       updated.goalTimeValue,
       updated.goalTimeUnit,
       updated.age,
-      updated.gender.toLowerCase(),
+      updated.gender,
+      updated.height,
     );
 
     setProfile(updated);
