@@ -540,6 +540,53 @@
    DASHBOARD LAYOUT
 ================================ */
 
+/* Overall screen + internal header */
+.cs-dashboard-screen {
+  min-height: 100vh;
+  background: #f5f6f8;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top bar inside dashboard page */
+.cs-dashboard-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cs-dashboard-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+
+.cs-dashboard-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.cs-dashboard-brand-text {
+  letter-spacing: 0.01em;
+}
+
+.cs-dashboard-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.cs-dashboard-welcome strong {
+  font-weight: 600;
+}
+
+/* Main dashboard layout */
 .cs-dashboard-root {
   padding-top: 40px;
   padding-bottom: 40px;
@@ -559,6 +606,7 @@
   gap: 24px;
 }
 
+/* Generic card used in dashboard + other pages */
 .cs-card {
   background: white;
   padding: 24px 28px;
@@ -584,8 +632,56 @@
   margin-bottom: 14px;
 }
 
+/* Track Calories CTA card */
 .cs-card-track {
   background: linear-gradient(to right, #ecfdf5, #f6fff9);
+}
+
+.cs-card-track-lg {
+  padding: 22px 24px;
+}
+
+/* Gradient Track Calories card */
+.cs-card-track-primary {
+  cursor: pointer;
+  background: linear-gradient(135deg, #22c55e, #2563eb);
+  color: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.25);
+  padding: 22px 26px;
+}
+
+/* Align icon + text */
+.cs-card-track-main {
+  justify-content: flex-start;
+  gap: 16px;
+}
+
+/* Circular plus icon */
+.cs-card-track-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+/* White title + subtitle */
+.cs-card-track-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.cs-card-track-text {
+  margin: 2px 0 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .cs-card-track-header {
@@ -599,6 +695,7 @@
   font-weight: 700;
 }
 
+/* Profile grid */
 .cs-profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -611,18 +708,68 @@
   margin-bottom: 2px;
 }
 
+/* Daily target pill */
 .cs-profile-target {
   margin-top: 18px;
-  background: #f1f5f9;
+  background: #f0fdf4;
   padding: 12px 14px;
   border-radius: 12px;
   font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #bbf7d0;
+}
+
+.cs-profile-target-label {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.cs-profile-target-value {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+/* Goal progress */
+.cs-goal-card {
+  border-left: 4px solid #22c55e;
 }
 
 .cs-goal-progress-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
+}
+
+.cs-goal-row-highlight {
+  background: #eff6ff;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.cs-goal-number {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.cs-goal-text-right {
+  text-align: right;
+}
+
+.cs-goal-badge {
+  margin-top: 10px;
+  font-size: 13px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: #f3f4ff;
+  color: #4b5563;
+}
+
+/* Recommendations */
+.cs-reco-card h3 {
+  margin-bottom: 6px;
 }
 
 .cs-reco-list {
@@ -635,6 +782,7 @@
   color: #374151;
 }
 
+/* Calendar card */
 .cs-calendar-card {
   padding-bottom: 30px;
 }
@@ -707,6 +855,11 @@
   font-size: 13px;
 }
 
+/* Weekly trend */
+.cs-week-header {
+  margin-bottom: 8px;
+}
+
 .cs-week-range {
   font-size: 14px;
   color: #475569;
@@ -738,13 +891,50 @@
   color: #64748b;
 }
 
+.cs-accuracy-message-good {
+  background: #ecfdf5;
+  border-radius: 8px;
+  padding: 8px 10px;
+  border: 1px solid #bbf7d0;
+}
+
+
 /* ================================
    TRACK CALORIES (SEARCH + MANUAL + LIST)
 ================================ */
 
-.cs-track-root {
-  padding-top: 40px;
+/* Whole page background for Track Calories */
+.cs-track-page {
+  background: #f5f7fb;
+  min-height: 100vh;
+  padding-top: 32px;
   padding-bottom: 40px;
+}
+
+/* Header row with back button + title + date */
+.cs-track-header-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.cs-track-back-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  color: #111827;
+}
+
+.cs-track-back-btn:hover {
+  background: #e5e7eb;
 }
 
 .cs-track-title {
@@ -753,12 +943,29 @@
   margin-bottom: 4px;
 }
 
-.cs-track-date {
-  color: #6b7280;
-  margin-bottom: 24px;
+.cs-track-date-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
 }
 
-/* Two-column layout: left — Search / Manual entry, right — Meal list */
+.cs-track-date-icon {
+  font-size: 16px;
+}
+
+.cs-track-date-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Inner content wrapper */
+.cs-track-root {
+  padding-top: 8px;
+  padding-bottom: 40px;
+}
+
+/* Two-column layout: left — Search / Manual entry, right — meal list */
 .cs-track-grid {
   display: grid;
   grid-template-columns: 1.7fr 1.3fr;
@@ -771,12 +978,53 @@
   }
 }
 
+/* Slightly softer cards on track page (used on both columns) */
+.cs-track-card {
+  border-radius: 24px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  border: 1px solid #e5e7eb;
+}
+
+/* Left stacked cards */
+.cs-track-left {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* Search row */
 .cs-search-row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 10px;
   margin-top: 6px;
   margin-bottom: 16px;
+}
+
+/* Dark square search button */
+.cs-search-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: none;
+  background: #020617;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.cs-search-btn:hover {
+  background: #111827;
+}
+
+/* Optional small status under search */
+.cs-search-status {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #6b7280;
 }
 
 /* Search results container */
@@ -813,6 +1061,7 @@
   margin-top: 2px;
 }
 
+/* Manual entry form */
 .cs-manual-form {
   margin-top: 14px;
   display: flex;
@@ -824,18 +1073,42 @@
   margin-top: 4px;
 }
 
+/* Quantity row + buttons */
 .cs-qty-row {
   display: inline-flex;
   align-items: center;
   gap: 10px;
 }
 
-.cs-qty-row button {
-  width: 26px;
-  height: 26px;
-  padding: 0;
+.cs-qty-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
 }
 
+.cs-qty-btn:hover {
+  background: #f3f4f6;
+}
+
+.cs-qty-value {
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Manual add button full width */
+.cs-track-add-btn {
+  margin-top: 4px;
+  border-radius: 10px;
+}
+
+/* Meal list */
 .cs-meal-list {
   display: flex;
   flex-direction: column;
@@ -864,10 +1137,22 @@
   gap: 6px;
 }
 
+/* Empty state */
 .cs-empty-state {
   text-align: center;
   padding: 40px 0;
   color: #6b7280;
   line-height: 1.5;
   font-size: 15px;
+}
+
+.cs-empty-title {
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.cs-empty-subtitle {
+  font-size: 14px;
+  color: #6b7280;
 }

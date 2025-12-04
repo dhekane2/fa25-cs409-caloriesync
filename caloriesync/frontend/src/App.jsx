@@ -7,20 +7,23 @@ import TrackCaloriesPage from './pages/TrackCaloriesPage.jsx';
 import './App.css';
 import './index.css';
 
-
 function Header() {
   const location = useLocation();
+
   const isAuthPage =
     location.pathname === '/login' || location.pathname === '/register';
 
-// Use a transparent header on the Landing page; use a regular header on all other pages
+  const isDashboardLike =
+    location.pathname === '/dashboard' || location.pathname === '/track';
+
+  // Do NOT show global header on Login / Register / Dashboard / Track
+  if (isAuthPage || isDashboardLike) return null;
+
+  // On landing only, keep the transparent-style header
   const headerClass =
     location.pathname === '/'
       ? 'cs-header cs-header-landing'
       : 'cs-header cs-header-simple';
-
-// Do not display the header on the Login / Register pages
-  if (isAuthPage) return null;
 
   return (
     <header className={headerClass}>
@@ -50,7 +53,6 @@ export default function App() {
 
   return (
     <div className="cs-app-root">
-      {/* Only show the header on the Landing, Dashboard, and Track pages */}
       <Header />
 
       <main
