@@ -50,7 +50,6 @@ export default function DashboardPage() {
 
   return (
     <div className="cs-dashboard-screen">
-      {/* Figma-style page header (replaces global app header) */}
       <header className="cs-dashboard-header">
         <div className="cs-container cs-dashboard-header-inner">
           <div className="cs-dashboard-brand">
@@ -75,7 +74,7 @@ export default function DashboardPage() {
       {/* Main dashboard content */}
       <div className="cs-container cs-dashboard-root">
         <div className="cs-dashboard-grid">
-          {/* Left Side：Track calories shortcut + Profile + Goal Progress + Recommendations */}
+          {/* Left Side: Track calories shortcut + Profile + Goal Progress + Recommendations */}
           <div className="cs-dashboard-left">
             {/* Track Calories gradient card */}
             <section
@@ -90,7 +89,6 @@ export default function DashboardPage() {
                 </div>
               </div>
             </section>
-
 
             {/* Profile card */}
             {profile && (
@@ -119,6 +117,10 @@ export default function DashboardPage() {
                     <div>{profile.gender}</div>
                   </div>
                   <div>
+                    <div className="cs-profile-label">Height</div>
+                    <div>{profile.height} cm</div>
+                  </div>
+                  <div>
                     <div className="cs-profile-label">Current Weight</div>
                     <div>{profile.currentWeight} kg</div>
                   </div>
@@ -142,7 +144,7 @@ export default function DashboardPage() {
               </section>
             )}
 
-            {/* Goal progress card – styled closer to Figma */}
+            {/* Goal progress card */}
             <section className="cs-card cs-goal-card">
               <h3>Goal Progress</h3>
 
@@ -182,13 +184,14 @@ export default function DashboardPage() {
                 <li>Focus on planning meals ahead of time.</li>
                 <li>Use measuring tools to ensure accurate portion sizes.</li>
                 <li>
-                  Identify your trigger foods and find healthier alternatives.
+                  Identify your trigger foods and find healthier
+                  alternatives.
                 </li>
               </ul>
             </section>
           </div>
 
-          {/* Right Side：Monthly calendar + weekly trend */}
+          {/* Right Side: Monthly calendar + weekly trend */}
           <div className="cs-dashboard-right">
             {/* Calendar */}
             <section className="cs-card cs-calendar-card">

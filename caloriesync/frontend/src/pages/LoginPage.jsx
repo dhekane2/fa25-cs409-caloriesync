@@ -1,4 +1,3 @@
-// src/pages/LoginPage.jsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { mockLogin } from '../services/mockApi.js';
@@ -22,11 +21,10 @@ export default function LoginPage() {
   };
 
   return (
-    // Green background (same as Register)
     <div className="cs-main-auth-bg">
-      {/* Login-specific wrapper, separate from Register */}
+      {/* Login-specific wrapper */}
       <div className="cs-login-wrapper">
-        {/* Logo + title (same visual as Register) */}
+        {/* Logo & title */}
         <div className="cs-register-header">
           <div className="cs-register-logo">
             <span className="cs-register-logo-mark">∿</span>

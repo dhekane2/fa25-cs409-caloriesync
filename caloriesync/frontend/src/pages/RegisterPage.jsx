@@ -13,10 +13,10 @@ export default function RegisterPage() {
     phone: '',
     age: '',
     gender: '',
+    height: '',       
     weight: '',
     goalWeight: '',
     goalTimeValue: '',
-    // Provide a default unit to prevent empty string issue
     goalTimeUnit: 'day',
   });
   const [error, setError] = useState('');
@@ -29,7 +29,6 @@ export default function RegisterPage() {
     e.preventDefault();
     setError('');
 
-    // Extract fields for easier reading and validation
     const {
       firstName,
       lastName,
@@ -38,14 +37,14 @@ export default function RegisterPage() {
       confirmPassword,
       age,
       gender,
+      height,
       weight,
       goalWeight,
       goalTimeValue,
       goalTimeUnit,
     } = form;
 
-    // 1. Validate that all fields except phone are required
-    //    (phone is optional and not validated)
+    // 1. Required fields (phone is optional)
     if (
       !firstName.trim() ||
       !lastName.trim() ||
@@ -54,10 +53,10 @@ export default function RegisterPage() {
       !confirmPassword.trim() ||
       !String(age).trim() ||
       !gender.trim() ||
+      !String(height).trim() ||     
       !String(weight).trim() ||
       !String(goalWeight).trim() ||
       !String(goalTimeValue).trim()
-      // No need to validate goalTimeUnit because default is "day"
     ) {
       setError('Please fill in all fields (except Phone Number).');
       return;
@@ -70,7 +69,6 @@ export default function RegisterPage() {
     }
 
     try {
-      // Include firstName and lastName into API submission
       await mockSignUp({
         ...form,
       });
@@ -82,7 +80,7 @@ export default function RegisterPage() {
 
   return (
     <div className="cs-auth-wrapper">
-      {/* Top logo + title section */}
+      {/* Top logo & title section */}
       <div className="cs-register-header">
         <div className="cs-register-logo">
           <span className="cs-register-logo-mark">∿</span>
@@ -156,7 +154,7 @@ export default function RegisterPage() {
             />
           </label>
 
-          {/* Phone number (optional, no required) */}
+          {/* Phone number (optional) */}
           <label className="cs-field cs-grid-2-span">
             <span className="cs-field-label">Phone Number (Optional)</span>
             <input
@@ -196,7 +194,20 @@ export default function RegisterPage() {
             </select>
           </label>
 
-          {/* Current / Goal weight */}
+          {/* Height / Current weight */}
+          <label className="cs-field">
+            <span className="cs-field-label">Height (cm)</span>
+            <input
+              className="cs-input"
+              type="number"
+              min="100"
+              max="250"
+              value={form.height}
+              onChange={(e) => update('height', e.target.value)}
+              required
+            />
+          </label>
+
           <label className="cs-field">
             <span className="cs-field-label">Current Weight (kg)</span>
             <input
@@ -208,7 +219,8 @@ export default function RegisterPage() {
             />
           </label>
 
-          <label className="cs-field">
+          {/* Goal weight (full row) */}
+          <label className="cs-field cs-grid-2-span">
             <span className="cs-field-label">Goal Weight (kg)</span>
             <input
               className="cs-input"

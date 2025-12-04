@@ -1,3 +1,5 @@
+import { calculateDailyTargetCalories } from '../utils/calorieUtils.js';
+
 export async function mockLogin({ email, password }) {
   await delay(400);
 
@@ -6,7 +8,7 @@ export async function mockLogin({ email, password }) {
     throw new Error('Email and password are required');
   }
 
-  // Retrieve stored profile from localStorage 
+  // Retrieve stored profile from localStorage
   const stored = localStorage.getItem('cs_profile');
   if (!stored) {
     // No account registered yet
@@ -15,7 +17,7 @@ export async function mockLogin({ email, password }) {
 
   const profile = JSON.parse(stored);
 
-  // Check if email matches 
+  // Check if email matches
   if (
     !profile.email ||
     profile.email.toLowerCase() !== email.toLowerCase()
@@ -28,7 +30,7 @@ export async function mockLogin({ email, password }) {
     throw new Error('Incorrect password. Please try again.');
   }
 
-  // Passed all checks — issue token 
+  // Passed all checks — issue token
   localStorage.setItem('cs_token', 'mock-token');
   return {
     token: 'mock-token',
@@ -89,15 +91,37 @@ export function getMockProfile() {
       [f.firstName, f.lastName].filter(Boolean).join(' ').trim() ||
       'ian';
 
-    const dailyTarget = 2427; // just a mock number; could be recomputed
+    const age = parseInt(f.age || '24', 10);
+    const gender = f.gender || 'Male';
+    const height = parseFloat(f.height || '170'); // cm
+    const currentWeight = parseFloat(f.weight || '75');
+    const goalWeight = parseFloat(f.goalWeight || '70');
+    const goalTimeValue = parseFloat(f.goalTimeValue || '4');
+    const goalTimeUnit = f.goalTimeUnit || 'months';
+
+    const rawDailyTarget = calculateDailyTargetCalories(
+      currentWeight,
+      goalWeight,
+      goalTimeValue,
+      goalTimeUnit,
+      age,
+      gender,
+      height,
+    );
+
+    const dailyTarget =
+      rawDailyTarget && Number.isFinite(rawDailyTarget)
+        ? rawDailyTarget
+        : 2427; // fallback
 
     return {
       name: fullName,
       email: f.email || 'ian@gmail.com',
-      age: parseInt(f.age || '24', 10),
-      gender: f.gender || 'Male',
-      currentWeight: parseFloat(f.weight || '75'),
-      goalWeight: parseFloat(f.goalWeight || '70'),
+      age,
+      gender,
+      height,
+      currentWeight,
+      goalWeight,
       goalTimeframe: `${f.goalTimeValue || '4'} ${
         f.goalTimeUnit || 'months'
       }`,
@@ -106,15 +130,33 @@ export function getMockProfile() {
   }
 
   // Default profile if there is nothing stored yet
+  const defaultHeight = 170;
+  const defaultCurrentWeight = 75;
+  const defaultGoalWeight = 70;
+  const defaultAge = 24;
+  const defaultTimeValue = 4;
+  const defaultTimeUnit = 'weeks';
+
+  const fallbackDailyTarget = calculateDailyTargetCalories(
+    defaultCurrentWeight,
+    defaultGoalWeight,
+    defaultTimeValue,
+    defaultTimeUnit,
+    defaultAge,
+    'Male',
+    defaultHeight,
+  );
+
   return {
     name: 'ian',
     email: 'ian@gmail.com',
-    age: 24,
+    age: defaultAge,
     gender: 'Male',
-    currentWeight: 75,
-    goalWeight: 70,
+    height: defaultHeight,
+    currentWeight: defaultCurrentWeight,
+    goalWeight: defaultGoalWeight,
     goalTimeframe: '4 weeks',
-    dailyTarget: 1500,
+    dailyTarget: fallbackDailyTarget || 1500,
   };
 }
 
@@ -239,4 +281,3 @@ export async function mockSearchFood(query) {
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
-
