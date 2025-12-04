@@ -651,13 +651,11 @@
   padding: 22px 26px;
 }
 
-/* Align icon + text */
 .cs-card-track-main {
   justify-content: flex-start;
   gap: 16px;
 }
 
-/* Circular plus icon */
 .cs-card-track-icon {
   width: 40px;
   height: 40px;
@@ -670,7 +668,6 @@
   font-weight: 500;
 }
 
-/* White title + subtitle */
 .cs-card-track-title {
   margin: 0;
   font-size: 22px;
@@ -690,12 +687,7 @@
   align-items: center;
 }
 
-.cs-card-track-header h2 {
-  font-size: 22px;
-  font-weight: 700;
-}
-
-/* Profile grid */
+/* Profile grid (view mode) */
 .cs-profile-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -706,6 +698,34 @@
   color: #64748b;
   font-size: 13px;
   margin-bottom: 2px;
+}
+
+/* Profile edit mode layout */
+.cs-profile-card {
+  position: relative;
+}
+
+.cs-profile-edit-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 4px;
+}
+
+.cs-profile-field-full {
+  width: 100%;
+}
+
+.cs-profile-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.cs-profile-edit-grid .cs-input,
+.cs-profile-edit-grid select {
+  background: #f9fafb;
+  border-radius: 10px;
 }
 
 /* Daily target pill */
@@ -837,6 +857,13 @@
   padding: 10px;
   border-radius: 10px;
   min-height: 70px;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cs-calendar-cell:hover {
+  background: #e5f0ff;
+  box-shadow: 0 0 0 1px #dbeafe;
 }
 
 .cs-calendar-cell-out {
@@ -860,10 +887,29 @@
   margin-bottom: 8px;
 }
 
-.cs-week-range {
-  font-size: 14px;
-  color: #475569;
+.cs-week-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cs-week-range-block {
+  text-align: center;
+}
+
+.cs-week-range-main {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.cs-week-range-tag {
+  font-size: 12px;
+  color: #16a34a;
+  margin-top: 2px;
 }
 
 .cs-accuracy {
@@ -897,7 +943,6 @@
   padding: 8px 10px;
   border: 1px solid #bbf7d0;
 }
-
 
 /* ================================
    TRACK CALORIES (SEARCH + MANUAL + LIST)
