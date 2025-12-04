@@ -1,10 +1,42 @@
 export async function mockLogin({ email, password }) {
   await delay(400);
+
+  // Basic field validation
   if (!email || !password) {
     throw new Error('Email and password are required');
   }
+
+  // Retrieve stored profile from localStorage 
+  const stored = localStorage.getItem('cs_profile');
+  if (!stored) {
+    // No account registered yet
+    throw new Error('Account not found. Please sign up first.');
+  }
+
+  const profile = JSON.parse(stored);
+
+  // Check if email matches 
+  if (
+    !profile.email ||
+    profile.email.toLowerCase() !== email.toLowerCase()
+  ) {
+    throw new Error('Email not found. Please check your email or sign up.');
+  }
+
+  // Validate password
+  if (!profile.password || profile.password !== password) {
+    throw new Error('Incorrect password. Please try again.');
+  }
+
+  // Passed all checks — issue token 
   localStorage.setItem('cs_token', 'mock-token');
-  return { token: 'mock-token' };
+  return {
+    token: 'mock-token',
+    user: {
+      name: profile.name || 'User',
+      email: profile.email,
+    },
+  };
 }
 
 // Sign up mock – email & password required, phone optional.
