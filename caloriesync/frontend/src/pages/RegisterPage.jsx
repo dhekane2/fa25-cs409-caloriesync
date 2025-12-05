@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { mockSignUp } from '../services/mockApi.js';
+import apiClient from '../services/apiClient.js';
 
 export default function RegisterPage() {
   const nav = useNavigate();
@@ -20,6 +20,7 @@ export default function RegisterPage() {
     goalTimeUnit: 'day',
   });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const update = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -69,12 +70,39 @@ export default function RegisterPage() {
     }
 
     try {
-      await mockSignUp({
-        ...form,
-      });
+      setLoading(true);
+      // Map frontend fields to backend API contract
+      const payload = {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password,
+        phone_number: form.phone || '',
+        age: Number(age),
+        gender: gender.toLowerCase(),
+        height: Number(height),
+        weight: Number(weight),
+        goal_weight: Number(goalWeight),
+        goal_timeframe_value: Number(goalTimeValue),
+        goal_timeframe_unit:
+          goalTimeUnit === 'day'
+            ? 'days'
+            : goalTimeUnit === 'week'
+            ? 'weeks'
+            : 'months',
+      };
+
+      await apiClient.post('/auth/register', payload);
+
       nav('/dashboard');
     } catch (err) {
-      setError(err.message || 'Sign up failed');
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        'Sign up failed. Please try again.';
+      setError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -268,8 +296,9 @@ export default function RegisterPage() {
           <button
             type="submit"
             className="cs-btn cs-btn-dark cs-btn-full cs-grid-2-span"
+            disabled={loading}
           >
-            Create Account
+            {loading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 

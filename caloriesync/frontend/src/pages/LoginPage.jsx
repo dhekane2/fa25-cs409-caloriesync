@@ -1,22 +1,37 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { mockLogin } from '../services/mockApi.js';
+import apiClient from '../services/apiClient.js';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const nav = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter both email and password.');
+      return;
+    }
+
     try {
-      await mockLogin({ email, password });
+      setLoading(true);
+
+      await apiClient.post('/auth/login', { email, password });
+
       nav('/dashboard');
     } catch (err) {
-      setError(err.message || 'Login failed');
+      const message =
+        err.response?.data?.message ||
+        err.message ||
+        'Login failed. Please try again.';
+      setError(message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,8 +83,12 @@ export default function LoginPage() {
             {error && <p className="cs-error-text">{error}</p>}
 
             {/* Full-width button */}
-            <button type="submit" className="cs-btn cs-btn-dark cs-btn-full">
-              Log In
+            <button
+              type="submit"
+              className="cs-btn cs-btn-dark cs-btn-full"
+              disabled={loading}
+            >
+              {loading ? 'Logging In...' : 'Log In'}
             </button>
           </form>
 

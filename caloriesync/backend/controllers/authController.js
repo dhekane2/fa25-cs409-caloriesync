@@ -8,6 +8,9 @@ const SALT_ROUNDS = 10;
 
 const COOKIE_NAME = 'refreshToken';
 const REFRESH_TOKEN_MAX_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in ms
+
+const ACCESS_COOKIE_NAME = 'accessToken';
+const ACCESS_TOKEN_MAX_AGE = 2 * 60 * 1000; // 2 minutes in ms
 // Cookie options for refresh token. Adjust these when deploying to support
 // cross-site cookies (frontend and backend served from different origins):
 // - For local development with same-origin or simple cross-origin flows,
@@ -26,6 +29,11 @@ const cookieOptions = {
   path: '/'
 };
 
+const accessCookieOptions = {
+  ...cookieOptions,
+  maxAge: ACCESS_TOKEN_MAX_AGE
+};
+
 function generateAccessToken(user) {
   return jwt.sign({ id: user._id, email: user.email }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES });
 }
@@ -35,9 +43,45 @@ function generateRefreshToken(user) {
 }
 
 export async function register(req, res) {
+  
+  console.log("Register request received");
+
   try {
-    const { first_name, last_name, email, password, phone_number, age, gender, weight, goal_weight } = req.body;
-    if (!first_name || !last_name || !email || !password || !age || !gender || weight == null || goal_weight == null) {
+    const {
+      first_name,
+      last_name,
+      email,
+      password,
+      phone_number,
+      age,
+      gender,
+      height,
+      weight,
+      goal_weight,
+      goal_timeframe_value,
+      goal_timeframe_unit
+    } = req.body;
+
+    // phone_number is optional; treat empty string as "not provided"
+    const normalizedPhone =
+      typeof phone_number === 'string' && phone_number.trim() === ''
+        ? undefined
+        : phone_number;
+
+    // goal_timeframe_value and goal_timeframe_unit are required from frontend
+    if (
+      !first_name ||
+      !last_name ||
+      !email ||
+      !password ||
+      !age ||
+      !gender ||
+      height == null ||
+      weight == null ||
+      goal_weight == null ||
+      goal_timeframe_value == null ||
+      !goal_timeframe_unit
+    ) {
       return res.status(400).json({ message: 'Missing required fields' });
     }
 
@@ -51,11 +95,14 @@ export async function register(req, res) {
       last_name,
       email: email.toLowerCase(),
       password_hash,
-      phone_number,
+      phone_number: normalizedPhone,
       age,
       gender,
+      height,
       weight,
-      goal_weight
+      goal_weight,
+      goal_timeframe_value: Number(goal_timeframe_value),
+      goal_timeframe_unit
     });
 
     await user.save();
@@ -67,14 +114,15 @@ export async function register(req, res) {
     user.refresh_token = refreshToken;
     await user.save();
 
-    // set HttpOnly cookie for refresh token
+    // set HttpOnly cookies for access and refresh tokens
+    res.cookie(ACCESS_COOKIE_NAME, accessToken, accessCookieOptions);
     res.cookie(COOKIE_NAME, refreshToken, cookieOptions);
 
     const safeUser = user.toObject();
     delete safeUser.password_hash;
     delete safeUser.refresh_token;
 
-    return res.status(201).json({ user: safeUser, message:"user registered successfully", accessToken });
+    return res.status(201).json({ user: safeUser, message:"user registered successfully" });
   } catch (err) {
     console.error('Register error', err);
     return res.status(500).json({ message: 'Internal server error' });
@@ -82,6 +130,8 @@ export async function register(req, res) {
 }
 
 export async function login(req, res) {
+
+  console.log("Login request received");
   try {
     const { email, password } = req.body;
     if (!email || !password) return res.status(400).json({ message: 'Missing email or password' });
@@ -99,14 +149,15 @@ export async function login(req, res) {
     user.refresh_token = refreshToken;
     await user.save();
 
-    // set HttpOnly cookie for refresh token
+    // set HttpOnly cookies for access and refresh tokens
+    res.cookie(ACCESS_COOKIE_NAME, accessToken, accessCookieOptions);
     res.cookie(COOKIE_NAME, refreshToken, cookieOptions);
 
     const safeUser = user.toObject();
     delete safeUser.password_hash;
     delete safeUser.refresh_token;
 
-    return res.json({ user: safeUser, message:"user logged in successfully", accessToken });
+    return res.json({ user: safeUser, message:"user logged in successfully" });
   } catch (err) {
     console.error('Login error', err);
     return res.status(500).json({ message: 'Internal server error' });
@@ -134,7 +185,11 @@ export async function refresh(req, res) {
     }
 
     const accessToken = generateAccessToken(user);
-    return res.json({ accessToken });
+
+    // refresh access token cookie
+    res.cookie(ACCESS_COOKIE_NAME, accessToken, accessCookieOptions);
+
+    return res.json({ message: 'access token refreshed' });
   } catch (err) {
     console.error('Refresh error', err);
     return res.status(500).json({ message: 'Internal server error' });
@@ -142,11 +197,14 @@ export async function refresh(req, res) {
 }
 
 export async function logout(req, res) {
+
+  console.log("Logout request received");
   try {
     const refreshToken = req.cookies && req.cookies[COOKIE_NAME];
     if (!refreshToken) {
       // clear cookie anyway
       res.clearCookie(COOKIE_NAME, cookieOptions);
+      res.clearCookie(ACCESS_COOKIE_NAME, accessCookieOptions);
       return res.json({ message: 'Logged out' });
     }
 
@@ -162,8 +220,9 @@ export async function logout(req, res) {
       }
     }
 
-    // clear the cookie on logout
+    // clear the cookies on logout
     res.clearCookie(COOKIE_NAME, cookieOptions);
+    res.clearCookie(ACCESS_COOKIE_NAME, accessCookieOptions);
     return res.json({ message: 'Logged out' });
   } catch (err) {
     console.error('Logout error', err);
