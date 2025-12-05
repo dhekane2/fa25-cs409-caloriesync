@@ -40,6 +40,7 @@ export async function usdaSearch(req, res) {
           ? food.foodNutrients
           : [];
 
+        // Find calories (Energy)
         const caloriesNutrient = nutrients.find(
           (n) =>
             n &&
@@ -47,6 +48,38 @@ export async function usdaSearch(req, res) {
               n.nutrientNumber === '208' ||
               (typeof n.nutrientName === 'string' &&
                 n.nutrientName.toLowerCase() === 'energy'))
+        );
+
+        // Find protein (nutrientId 1003 or nutrientNumber '203')
+        const proteinNutrient = nutrients.find(
+          (n) =>
+            n &&
+            (n.nutrientId === 1003 ||
+              n.nutrientNumber === '203' ||
+              (typeof n.nutrientName === 'string' &&
+                n.nutrientName.toLowerCase().includes('protein')))
+        );
+
+        // Find total fat (nutrientId 1004 or nutrientNumber '204')
+        const fatNutrient = nutrients.find(
+          (n) =>
+            n &&
+            (n.nutrientId === 1004 ||
+              n.nutrientNumber === '204' ||
+              (typeof n.nutrientName === 'string' &&
+                n.nutrientName.toLowerCase().includes('fat') &&
+                n.nutrientName.toLowerCase().includes('total')))
+        );
+
+        // Find total carbohydrates (nutrientId 1005 or nutrientNumber '205')
+        const carbsNutrient = nutrients.find(
+          (n) =>
+            n &&
+            (n.nutrientId === 1005 ||
+              n.nutrientNumber === '205' ||
+              (typeof n.nutrientName === 'string' &&
+                n.nutrientName.toLowerCase().includes('carbohydrate') &&
+                n.nutrientName.toLowerCase().includes('total')))
         );
 
         if (!caloriesNutrient || caloriesNutrient.value == null) {
@@ -60,7 +93,13 @@ export async function usdaSearch(req, res) {
           serving_size: food.servingSize ?? null,
           serving_size_unit: food.servingSizeUnit ?? null,
           calories: caloriesNutrient.value,
-          calories_unit: caloriesNutrient.unitName || 'kcal'
+          calories_unit: caloriesNutrient.unitName || 'kcal',
+          protein: proteinNutrient?.value ?? 0,
+          protein_unit: proteinNutrient?.unitName || 'g',
+          fat: fatNutrient?.value ?? 0,
+          fat_unit: fatNutrient?.unitName || 'g',
+          carbs: carbsNutrient?.value ?? 0,
+          carbs_unit: carbsNutrient?.unitName || 'g'
         };
       })
       .filter((item) => item !== null)

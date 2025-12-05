@@ -1,7 +1,7 @@
 // src/pages/TrackCaloriesPage.jsx
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { mockSearchFood } from '../services/mockApi.js';
+import { searchUSDAFood } from '../services/api.js';
 
 export default function TrackCaloriesPage() {
   const nav = useNavigate();
@@ -36,6 +36,7 @@ const [userEmail] = useState(() => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]); // foods with _quantity, macros
   const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef(null);
 
   const [manualName, setManualName] = useState('');
   const [manualCalories, setManualCalories] = useState('');
@@ -69,42 +70,68 @@ const [userEmail] = useState(() => {
     setMealList(items);
   }, [userEmail, targetDate]);
 
-  // --- debounced search for food ---
+  // --- perform search function ---
+  const performSearch = async (query) => {
+    const trimmed = query.trim();
+    if (!trimmed) {
+      setSearchResults([]);
+      return;
+    }
+
+    try {
+      setIsSearching(true);
+      const rawResults = (await searchUSDAFood(trimmed)) || [];
+
+      // enrich with quantity field to match layout
+      const enriched = rawResults.map((f) => ({
+        ...f,
+        nf_protein: f.nf_protein ?? 0,
+        nf_total_fat: f.nf_total_fat ?? 0,
+        nf_total_carbohydrate: f.nf_total_carbohydrate ?? 0,
+        _quantity: 1,
+      }));
+      setSearchResults(enriched);
+    } catch (err) {
+      console.error('Search failed:', err);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // --- debounced search for food (triggers when user stops typing) ---
   useEffect(() => {
+    // Clear any existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
     const trimmed = searchTerm.trim();
     if (!trimmed) {
       setSearchResults([]);
       return;
     }
 
-    const handle = setTimeout(async () => {
-      try {
-        setIsSearching(true);
-        const rawResults = (await mockSearchFood(trimmed)) || [];
-
-        // enrich with macros + quantity field to match layout
-        const enriched = rawResults.map((f) => ({
-          ...f,
-          nf_protein: f.nf_protein ?? 0,
-          nf_total_fat: f.nf_total_fat ?? 0,
-          nf_total_carbohydrate: f.nf_total_carbohydrate ?? 0,
-          _quantity: 1,
-        }));
-        setSearchResults(enriched);
-      } catch (err) {
-        console.error('Search failed:', err);
-        setSearchResults([]);
-      } finally {
-        setIsSearching(false);
-      }
+    // Set up debounced search
+    searchTimeoutRef.current = setTimeout(() => {
+      performSearch(searchTerm);
     }, 500);
 
-    return () => clearTimeout(handle);
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
   }, [searchTerm]);
 
-  const handleSearchSubmit = (e) => {
+  const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    // debounce effect will handle the actual search
+    // Clear any pending debounced search
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    // Trigger search immediately on icon click
+    await performSearch(searchTerm);
   };
 
   const handleResultQtyChange = (id, value) => {
