@@ -1,35 +1,77 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  mockSearchFood, // later you can swap this to your real API
-  createEmptyMealListForToday,
-} from '../services/mockApi.js';
+// src/pages/TrackCaloriesPage.jsx
+import { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { mockSearchFood } from '../services/mockApi.js';
 
 export default function TrackCaloriesPage() {
+  const nav = useNavigate();
+  const location = useLocation();
+
+  // --- date handling (supports /track?date=YYYY-MM-DD) ---
+  const todayStr = new Date().toISOString().substring(0, 10);
+  const searchParams = new URLSearchParams(location.search);
+  const selectedDate = searchParams.get('date');
+  const targetDate = selectedDate || todayStr;
+
+  const isToday = targetDate === todayStr;
+  const formattedDate = new Date(targetDate + 'T00:00:00').toLocaleDateString(
+    'en-US',
+    { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
+  );
+
+const [userEmail] = useState(() => {
+  try {
+    const stored = localStorage.getItem('cs_profile');
+    if (stored) {
+      const p = JSON.parse(stored);
+      return p.email || '';
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return '';
+});
+
+  // --- search + manual entry state ---
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState([]); // foods with _quantity, macros
   const [isSearching, setIsSearching] = useState(false);
-  const [mealList, setMealList] = useState(createEmptyMealListForToday());
+
   const [manualName, setManualName] = useState('');
   const [manualCalories, setManualCalories] = useState('');
   const [manualQty, setManualQty] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState('');
-  const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const nav = useNavigate();
+  // --- meal list for this date ---
+  const [mealList, setMealList] = useState([]); // array of entries
+  const [saveError, setSaveError] = useState('');
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
-  const totalCalories = mealList.items.reduce(
-    (sum, item) => sum + item.calories,
-    0,
-  );
+  // nutrition totals for summary cards
+  const totalCalories = mealList.reduce((s, i) => s + (i.calories || 0), 0);
+  const totalProtein = mealList.reduce((s, i) => s + (i.protein || 0), 0);
+  const totalFat = mealList.reduce((s, i) => s + (i.fat || 0), 0);
+  const totalCarbs = mealList.reduce((s, i) => s + (i.carbs || 0), 0);
 
-  /* ---------------------------------------------------
-   * Debounced search
-   * --------------------------------------------------- */
+  // --- load existing meals for this date from localStorage ---
+  useEffect(() => {
+    if (!userEmail) return;
+
+    const allMeals = JSON.parse(localStorage.getItem('meals') || '{}');
+    const userMeals = allMeals[userEmail] || [];
+
+    const dateMeals = userMeals.filter((m) => m.date === targetDate);
+    const items = [];
+    dateMeals.forEach((m) => {
+      if (Array.isArray(m.items)) items.push(...m.items);
+    });
+
+    setMealList(items);
+  }, [userEmail, targetDate]);
+
+  // --- debounced search for food ---
   useEffect(() => {
     const trimmed = searchTerm.trim();
-
     if (!trimmed) {
       setSearchResults([]);
       return;
@@ -38,8 +80,17 @@ export default function TrackCaloriesPage() {
     const handle = setTimeout(async () => {
       try {
         setIsSearching(true);
-        const results = await mockSearchFood(trimmed);
-        setSearchResults(results || []); // API can now return top 5 items
+        const rawResults = (await mockSearchFood(trimmed)) || [];
+
+        // enrich with macros + quantity field to match layout
+        const enriched = rawResults.map((f) => ({
+          ...f,
+          nf_protein: f.nf_protein ?? 0,
+          nf_total_fat: f.nf_total_fat ?? 0,
+          nf_total_carbohydrate: f.nf_total_carbohydrate ?? 0,
+          _quantity: 1,
+        }));
+        setSearchResults(enriched);
       } catch (err) {
         console.error('Search failed:', err);
         setSearchResults([]);
@@ -51,121 +102,170 @@ export default function TrackCaloriesPage() {
     return () => clearTimeout(handle);
   }, [searchTerm]);
 
-  const handleSearchSubmit = async (e) => {
+  const handleSearchSubmit = (e) => {
     e.preventDefault();
-    const trimmed = searchTerm.trim();
-    if (!trimmed) return;
-
-    try {
-      setIsSearching(true);
-      const results = await mockSearchFood(trimmed);
-      setSearchResults(results || []);
-    } catch (err) {
-      console.error('Search failed:', err);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
+    // debounce effect will handle the actual search
   };
 
+  const handleResultQtyChange = (id, value) => {
+    const q = Number(value);
+    if (!q || q <= 0) return;
+    setSearchResults((prev) =>
+      prev.map((f) =>
+        f.id === id ? { ...f, _quantity: q } : f,
+      ),
+    );
+  };
+
+  // --- add food from API result into meal list ---
   const addFood = (food) => {
-    setMealList((prev) => ({
-      ...prev,
-      items: [
-        ...prev.items,
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          source: 'api',
-          food_name: food.food_name,
-          calories: Math.round(food.nf_calories),
-          quantity: 1,
-        },
-      ],
-    }));
+    const qty = food._quantity || 1;
+    const baseCal = food.nf_calories || 0;
+    const baseProtein = food.nf_protein || 0;
+    const baseFat = food.nf_total_fat || 0;
+    const baseCarbs = food.nf_total_carbohydrate || 0;
+
+    const entry = {
+      id: `${Date.now()}-${Math.random()}`,
+      food_name: food.food_name,
+      calories: Math.round(baseCal * qty),
+      protein: Math.round(baseProtein * qty),
+      fat: Math.round(baseFat * qty),
+      carbs: Math.round(baseCarbs * qty),
+      quantity: qty,
+      serving_unit: food.serving_unit || 'serving',
+      source: 'api',
+      baseCalories: baseCal,
+      baseProtein,
+      baseFat,
+      baseCarbs,
+    };
+
+    setMealList((prev) => [...prev, entry]);
   };
 
+  // --- manual entry ---
   const addManual = () => {
     if (!manualName.trim() || !manualCalories) return;
+
     const base = parseFloat(manualCalories);
-    setMealList((prev) => ({
-      ...prev,
-      items: [
-        ...prev.items,
-        {
-          id: `${Date.now()}-${Math.random()}`,
-          source: 'manual',
-          food_name: manualName,
-          calories: Math.round(base * manualQty),
-          quantity: manualQty,
-        },
-      ],
-    }));
+    if (!base || base <= 0) return;
+
+    const entry = {
+      id: `${Date.now()}-${Math.random()}`,
+      food_name: manualName,
+      calories: Math.round(base * manualQty),
+      protein: 0,
+      fat: 0,
+      carbs: 0,
+      quantity: manualQty,
+      serving_unit: 'serving',
+      source: 'manual',
+      baseCalories: base,
+    };
+
+    setMealList((prev) => [...prev, entry]);
     setManualName('');
     setManualCalories('');
     setManualQty(1);
   };
 
+  // --- update quantity in meal list (keeps calories/macros in sync) ---
   const updateQty = (id, q) => {
-    if (q <= 0) return;
-    setMealList((prev) => ({
-      ...prev,
-      items: prev.items.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: q,
-              calories: Math.round(
-                (item.calories / item.quantity) * q,
-              ),
-            }
-          : item,
-      ),
-    }));
+    const quantity = Number(q);
+    if (!quantity || quantity <= 0) return;
+
+    setMealList((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item;
+
+        if (item.source === 'api') {
+          return {
+            ...item,
+            quantity,
+            calories: Math.round((item.baseCalories || 0) * quantity),
+            protein: Math.round((item.baseProtein || 0) * quantity),
+            fat: Math.round((item.baseFat || 0) * quantity),
+            carbs: Math.round((item.baseCarbs || 0) * quantity),
+          };
+        }
+
+        // manual
+        return {
+          ...item,
+          quantity,
+          calories: Math.round((item.baseCalories || 0) * quantity),
+        };
+      }),
+    );
   };
 
   const removeItem = (id) => {
-    setMealList((prev) => ({
-      ...prev,
-      items: prev.items.filter((i) => i.id !== id),
-    }));
+    setMealList((prev) => prev.filter((i) => i.id !== id));
   };
 
-  const handleSubmitMeal = async () => {
-    if (mealList.items.length === 0) {
-      setSubmitError('Please add at least one item before submitting.');
+  // --- save to localStorage for this date + user ---
+  const handleSaveDailyLog = async () => {
+    if (mealList.length === 0) {
+      setSaveError('Please add at least one item before saving.');
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitError('');
-    setSubmitSuccess(false);
+    setIsSaving(true);
+    setSaveError('');
+    setSaveSuccess(false);
 
     try {
-      // TODO: replace this with your real backend API call
-      // const result = await logMeal(mealList.items);
+      const total = totalCalories;
 
-      // For now, simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // clear meal list on success
-      setMealList(createEmptyMealListForToday());
-      setSubmitSuccess(true);
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setSubmitSuccess(false), 3000);
-    } catch (err) {
-      setSubmitError(
-        err.message || 'Failed to submit meal. Please try again.',
+      // calorieData: summary per date
+      const allCalorieData = JSON.parse(
+        localStorage.getItem('calorieData') || '{}',
       );
+      const userData = allCalorieData[userEmail] || [];
+
+      const idx = userData.findIndex((d) => d.date === targetDate);
+      if (idx >= 0) {
+        userData[idx].consumed = total;
+      } else {
+        userData.push({
+          date: targetDate,
+          consumed: total,
+          burned: 0,
+        });
+      }
+      allCalorieData[userEmail] = userData;
+      localStorage.setItem('calorieData', JSON.stringify(allCalorieData));
+
+      // meals: detailed list per date
+      const allMeals = JSON.parse(localStorage.getItem('meals') || '{}');
+      const userMeals = allMeals[userEmail] || [];
+      const filtered = userMeals.filter((m) => m.date !== targetDate);
+
+      filtered.push({
+        date: targetDate,
+        timestamp: new Date().toISOString(),
+        items: mealList,
+        totalCalories: total,
+      });
+
+      allMeals[userEmail] = filtered;
+      localStorage.setItem('meals', JSON.stringify(allMeals));
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 2500);
+    } catch (err) {
+      console.error(err);
+      setSaveError('Failed to save. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setIsSaving(false);
     }
   };
 
   return (
     <div className="cs-track-page">
       <div className="cs-container">
-        {/* Header row with back button */}
+        {/* Header row with back button + title + date */}
         <div className="cs-track-header-row">
           <button
             type="button"
@@ -179,7 +279,9 @@ export default function TrackCaloriesPage() {
             <h1 className="cs-track-title">Track Calories</h1>
             <div className="cs-track-date-row">
               <span className="cs-track-date-icon">📅</span>
-              <span className="cs-track-date-label">Today</span>
+              <span className="cs-track-date-label">
+                {isToday ? 'Today' : formattedDate}
+              </span>
             </div>
           </div>
         </div>
@@ -200,12 +302,16 @@ export default function TrackCaloriesPage() {
                   onSubmit={handleSearchSubmit}
                 >
                   <input
-                    className="cs-input"
+                    className="cs-input cs-input-search"
                     placeholder="e.g., chicken breast, apple, rice..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <button className="cs-search-btn" type="submit">
+                  <button
+                    className="cs-search-btn"
+                    type="submit"
+                    aria-label="Search"
+                  >
                     🔍
                   </button>
                 </form>
@@ -217,23 +323,72 @@ export default function TrackCaloriesPage() {
                 {searchResults.length > 0 && !isSearching && (
                   <div className="cs-search-results">
                     {searchResults.map((f) => (
-                      <div key={f.id} className="cs-search-item">
-                        <div>
-                          <div className="cs-search-item-name">
-                            {f.food_name}
-                          </div>
-                          <div className="cs-search-item-sub">
-                            {Math.round(f.nf_calories)} cal •{' '}
-                            {f.serving_qty} {f.serving_unit}
+                      <div key={f.id} className="cs-search-item-card">
+                        <div className="cs-search-item-header">
+                          <div>
+                            <div className="cs-search-item-name">
+                              {f.food_name}
+                            </div>
+                            <div className="cs-search-item-sub">
+                              {Math.round(f.nf_calories)} cal •{' '}
+                              {f.serving_qty} {f.serving_unit}
+                            </div>
                           </div>
                         </div>
-                        <button
-                          className="cs-btn cs-btn-xs cs-btn-outline"
-                          type="button"
-                          onClick={() => addFood(f)}
-                        >
-                          Add
-                        </button>
+
+                        <div className="cs-search-macros-row">
+                          <div className="cs-search-macro">
+                            <div className="cs-search-macro-label">
+                              Protein
+                            </div>
+                            <div className="cs-search-macro-value">
+                              {Math.round(f.nf_protein || 0)}g
+                            </div>
+                          </div>
+                          <div className="cs-search-macro">
+                            <div className="cs-search-macro-label">Fat</div>
+                            <div className="cs-search-macro-value">
+                              {Math.round(f.nf_total_fat || 0)}g
+                            </div>
+                          </div>
+                          <div className="cs-search-macro">
+                            <div className="cs-search-macro-label">
+                              Carbs
+                            </div>
+                            <div className="cs-search-macro-value">
+                              {Math.round(
+                                f.nf_total_carbohydrate || 0,
+                              )}
+                              g
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="cs-search-qty-row">
+                          <span className="cs-search-qty-label">
+                            Quantity
+                          </span>
+                          <input
+                            type="number"
+                            min="0.5"
+                            step="0.5"
+                            className="cs-input cs-search-qty-input"
+                            value={f._quantity}
+                            onChange={(e) =>
+                              handleResultQtyChange(
+                                f.id,
+                                e.target.value,
+                              )
+                            }
+                          />
+                          <button
+                            type="button"
+                            className="cs-btn cs-btn-xs cs-btn-outline"
+                            onClick={() => addFood(f)}
+                          >
+                            Add
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -267,7 +422,9 @@ export default function TrackCaloriesPage() {
                       placeholder="e.g., 350"
                       type="number"
                       value={manualCalories}
-                      onChange={(e) => setManualCalories(e.target.value)}
+                      onChange={(e) =>
+                        setManualCalories(e.target.value)
+                      }
                     />
                   </label>
 
@@ -278,7 +435,7 @@ export default function TrackCaloriesPage() {
                         type="button"
                         className="cs-qty-btn"
                         onClick={() =>
-                          setManualQty((q) => Math.max(1, q - 1))
+                          setManualQty((q) => Math.max(0.5, q - 0.5))
                         }
                       >
                         –
@@ -287,7 +444,9 @@ export default function TrackCaloriesPage() {
                       <button
                         type="button"
                         className="cs-qty-btn"
-                        onClick={() => setManualQty((q) => q + 1)}
+                        onClick={() =>
+                          setManualQty((q) => q + 0.5)
+                        }
                       >
                         +
                       </button>
@@ -305,19 +464,21 @@ export default function TrackCaloriesPage() {
               </div>
             </div>
 
-            {/* RIGHT: Today’s meal list + Submit section */}
+            {/* RIGHT: Meal list + nutrition summary */}
             <div className="cs-card cs-track-card">
               <div className="cs-card-header-row">
                 <div>
-                  <h2 className="cs-card-title">Today&apos;s Meal List</h2>
+                  <h2 className="cs-card-title">
+                    {isToday ? "Today's Meal List" : "Meal List"}
+                  </h2>
                   <p className="cs-card-subtitle">
-                    {mealList.items.length} item(s) • {totalCalories} total
+                    {mealList.length} item(s) • {totalCalories} total
                     calories
                   </p>
                 </div>
               </div>
 
-              {mealList.items.length === 0 ? (
+              {mealList.length === 0 ? (
                 <div className="cs-empty-state">
                   <div className="cs-empty-title">
                     No items added yet
@@ -329,32 +490,34 @@ export default function TrackCaloriesPage() {
               ) : (
                 <>
                   <div className="cs-meal-list">
-                    {mealList.items.map((item) => (
+                    {mealList.map((item) => (
                       <div key={item.id} className="cs-meal-item">
-                        <div>
+                        <div className="cs-meal-main">
                           <div className="cs-search-item-name">
                             {item.food_name}
                           </div>
-                          <div className="cs-search-item-sub">
-                            {item.calories} cal • {item.quantity}x
+                          <div className="cs-meal-meta">
+                            {item.calories} cal • {item.quantity}{' '}
+                            {item.serving_unit || 'serving'}
                           </div>
                         </div>
                         <div className="cs-meal-actions">
                           <input
                             type="number"
-                            min="1"
+                            min="0.5"
+                            step="0.5"
                             className="cs-input cs-input-qty"
                             value={item.quantity}
                             onChange={(e) =>
                               updateQty(
                                 item.id,
-                                parseInt(e.target.value) || 1,
+                                e.target.value,
                               )
                             }
                           />
                           <button
                             type="button"
-                            className="cs-btn cs-btn-xs cs-btn-outline"
+                            className="cs-btn cs-btn-xs cs-btn-outline cs-meal-remove-btn"
                             onClick={() => removeItem(item.id)}
                           >
                             ✕
@@ -364,53 +527,60 @@ export default function TrackCaloriesPage() {
                     ))}
                   </div>
 
-                  {/* Submit Meal Button + messages (your addition) */}
-                  <div
-                    style={{
-                      marginTop: '1.5rem',
-                      paddingTop: '1.5rem',
-                      borderTop: '1px solid #e0e0e0',
-                    }}
-                  >
-                    {submitError && (
-                      <div
-                        className="cs-error-text"
-                        style={{ marginBottom: '0.75rem' }}
-                      >
-                        {submitError}
+                  {/* Nutrition summary */}
+                  <div className="cs-nutrition-section">
+                    <h3 className="cs-nutrition-title">
+                      Nutrition Summary
+                    </h3>
+                    <div className="cs-nutrition-grid">
+                      <div className="cs-nutrition-card cs-nutrition-card-calories">
+                        <div className="cs-nutrition-label">
+                          Total Calories
+                        </div>
+                        <div className="cs-nutrition-value">
+                          {totalCalories} cal
+                        </div>
+                      </div>
+                      <div className="cs-nutrition-card cs-nutrition-card-protein">
+                        <div className="cs-nutrition-label">
+                          Protein
+                        </div>
+                        <div className="cs-nutrition-value">
+                          {totalProtein}g
+                        </div>
+                      </div>
+                      <div className="cs-nutrition-card cs-nutrition-card-fat">
+                        <div className="cs-nutrition-label">Fat</div>
+                        <div className="cs-nutrition-value">
+                          {totalFat}g
+                        </div>
+                      </div>
+                      <div className="cs-nutrition-card cs-nutrition-card-carbs">
+                        <div className="cs-nutrition-label">Carbs</div>
+                        <div className="cs-nutrition-value">
+                          {totalCarbs}g
+                        </div>
+                      </div>
+                    </div>
+
+                    {saveError && (
+                      <div className="cs-error-text cs-save-error">
+                        {saveError}
                       </div>
                     )}
-                    {submitSuccess && (
-                      <div
-                        style={{
-                          color: '#10b981',
-                          marginBottom: '0.75rem',
-                          fontSize: '0.875rem',
-                          fontWeight: '500',
-                        }}
-                      >
-                        ✓ Meal submitted successfully!
+                    {saveSuccess && (
+                      <div className="cs-save-success">
+                        ✓ Saved to your daily log
                       </div>
                     )}
+
                     <button
                       type="button"
-                      className="cs-btn cs-btn-dark cs-btn-full"
-                      onClick={handleSubmitMeal}
-                      disabled={
-                        isSubmitting || mealList.items.length === 0
-                      }
-                      style={{
-                        opacity:
-                          isSubmitting || mealList.items.length === 0
-                            ? 0.6
-                            : 1,
-                        cursor:
-                          isSubmitting || mealList.items.length === 0
-                            ? 'not-allowed'
-                            : 'pointer',
-                      }}
+                      className="cs-btn cs-btn-dark cs-btn-full cs-save-log-btn"
+                      onClick={handleSaveDailyLog}
+                      disabled={isSaving}
                     >
-                      {isSubmitting ? 'Submitting...' : 'Submit Meal'}
+                      {isSaving ? 'Saving…' : 'Save to Daily Log'}
                     </button>
                   </div>
                 </>

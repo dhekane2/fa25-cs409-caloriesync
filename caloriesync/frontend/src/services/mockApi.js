@@ -252,12 +252,16 @@ export function createEmptyMealListForToday() {
 export async function mockSearchFood(query) {
   await delay(300);
   if (!query) return [];
-  // Mock 3 sample results
+
+  // simple mocked items with macros
   return [
     {
       id: '1',
       food_name: 'Grilled Chicken Breast',
       nf_calories: 220,
+      nf_protein: 32,
+      nf_total_fat: 5,
+      nf_total_carbohydrate: 0,
       serving_qty: 1,
       serving_unit: 'serving',
     },
@@ -265,6 +269,9 @@ export async function mockSearchFood(query) {
       id: '2',
       food_name: 'Brown Rice',
       nf_calories: 180,
+      nf_protein: 4,
+      nf_total_fat: 2,
+      nf_total_carbohydrate: 38,
       serving_qty: 1,
       serving_unit: 'cup',
     },
@@ -272,11 +279,15 @@ export async function mockSearchFood(query) {
       id: '3',
       food_name: 'Apple',
       nf_calories: 95,
+      nf_protein: 0,
+      nf_total_fat: 0,
+      nf_total_carbohydrate: 25,
       serving_qty: 1,
       serving_unit: 'medium',
     },
   ];
 }
+
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

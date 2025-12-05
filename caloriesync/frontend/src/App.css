@@ -1085,7 +1085,7 @@
   }
 }
 
-/* Slightly softer cards on track page (used on both columns) */
+/* Softer cards on track page */
 .cs-track-card {
   border-radius: 24px;
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
@@ -1099,7 +1099,12 @@
   gap: 24px;
 }
 
-/* Search row */
+/* Search input gets a slightly larger height here */
+.cs-input-search {
+  height: 44px;
+}
+
+/* Search row (input + square button) */
 .cs-search-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -1134,27 +1139,31 @@
   color: #6b7280;
 }
 
-/* Search results container */
+/* Search results container fills card nicely */
 .cs-search-results {
   margin-top: 10px;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  max-height: 260px;
+  border-radius: 18px;
+  padding: 4px;
+  max-height: 320px;
   overflow-y: auto;
-  background: white;
+  background: transparent;
 }
 
-/* Single food item */
-.cs-search-item {
-  padding: 12px 14px;
-  border-bottom: 1px solid #e5e7eb;
+/* Individual result card */
+.cs-search-item-card {
+  background: #f9fafb;
+  border-radius: 18px;
+  border: 1px solid #e5e7eb;
+  padding: 14px 16px 12px;
+  margin-bottom: 10px;
+}
+
+/* Header (name + calories/serving) inside search card */
+.cs-search-item-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-}
-
-.cs-search-item:last-child {
-  border-bottom: none;
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
 .cs-search-item-name {
@@ -1166,6 +1175,44 @@
   font-size: 13px;
   color: #6b7280;
   margin-top: 2px;
+}
+
+/* Macros row (Protein / Fat / Carbs) */
+.cs-search-macros-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  font-size: 13px;
+  margin-bottom: 8px;
+  margin-top: 2px;
+}
+
+.cs-search-macro-label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.cs-search-macro-value {
+  font-weight: 600;
+}
+
+/* Quantity row under each result */
+.cs-search-qty-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.cs-search-qty-label {
+  color: #6b7280;
+}
+
+.cs-search-qty-input {
+  width: 64px;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 10px;
 }
 
 /* Manual entry form */
@@ -1219,7 +1266,7 @@
 .cs-meal-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
   margin-top: 14px;
 }
 
@@ -1228,20 +1275,43 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cs-meal-item:last-child {
+  border-bottom: none;
+}
+
+.cs-meal-main {
+  min-width: 0;
+}
+
+.cs-meal-meta {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 2px;
 }
 
 /* Quantity input field */
 .cs-input-qty {
-  width: 52px;
+  width: 64px;
   text-align: center;
-  padding: 4px;
-  border-radius: 8px;
+  padding: 4px 8px;
+  border-radius: 10px;
 }
 
+/* Right side (qty + remove) */
 .cs-meal-actions {
-  display: inline-flex;
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  white-space: nowrap; /* keeps qty + ✕ on same line */
+}
+
+.cs-meal-remove-btn {
+  padding-inline: 10px;
 }
 
 /* Empty state */
@@ -1262,4 +1332,73 @@
 .cs-empty-subtitle {
   font-size: 14px;
   color: #6b7280;
+}
+
+/* Nutrition summary */
+.cs-nutrition-section {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.cs-nutrition-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.cs-nutrition-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.cs-nutrition-card {
+  border-radius: 16px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+/* different background tints for each metric */
+.cs-nutrition-card-calories {
+  background: #ecfdf5;
+}
+
+.cs-nutrition-card-protein {
+  background: #eff6ff;
+}
+
+.cs-nutrition-card-fat {
+  background: #fef3c7;
+}
+
+.cs-nutrition-card-carbs {
+  background: #f5f3ff;
+}
+
+.cs-nutrition-label {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 2px;
+}
+
+.cs-nutrition-value {
+  font-weight: 600;
+}
+
+/* Save / error messages */
+.cs-save-error {
+  margin-bottom: 8px;
+}
+
+.cs-save-success {
+  color: #10b981;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.cs-save-log-btn {
+  margin-top: 4px;
 }
