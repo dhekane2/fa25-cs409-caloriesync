@@ -36,6 +36,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     enum: ['male', 'female', 'other', 'prefer_not_to_say']
   },
+  height: {
+    type: Number,
+    required: true,
+    min: 70 // height in centimeters  
+  },
   weight: {
     type: Number,
     required: true,
@@ -48,12 +53,14 @@ const userSchema = new mongoose.Schema({
   },
   
   goal_timeframe_value: { 
-    type: Number 
+    type: Number,
+    required: true
   },
 
   goal_timeframe_unit:  { 
     type: String, 
-    enum: ["days", "weeks", "months"] 
+    enum: ["days", "weeks", "months"],
+    required: true
   },
   
   refresh_token: {
