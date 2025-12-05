@@ -17,6 +17,9 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
+import axios from 'axios';
+
+import apiClient from '../services/apiClient.js';
 
 /* ---------- helpers for timeframe & goal progress ---------- */
 
@@ -97,6 +100,13 @@ export default function DashboardPage() {
 
   /* ---------- load profile once on mount ---------- */
   useEffect(() => {
+
+    // apiClient.get('/user/dummydashboard').then((res) => {
+    //   console.log('Dashboard data:', res.data);
+    // }).catch((err) => {
+    //   console.error('Failed to fetch dashboard data:', err);
+    // });
+
     const p = getMockProfile();
 
     const { value: tfValue, unit: tfUnit } = parseGoalTimeframe(
@@ -139,9 +149,19 @@ export default function DashboardPage() {
   const handleNextWeek = () =>
     setWeekOffset((o) => (o > 0 ? o - 1 : 0)); // don’t go into future
 
-  const handleLogout = () => {
-    localStorage.removeItem('cs_token');
-    nav('/login');
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        'http://localhost:4000/auth/logout',
+        {},
+        { withCredentials: true },
+      );
+    } catch (err) {
+      console.error('Logout failed:', err);
+    } finally {
+      localStorage.removeItem('cs_token');
+      nav('/login');
+    }
   };
 
   const displayName = profile?.name || 'there';
