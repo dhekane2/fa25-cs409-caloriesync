@@ -460,10 +460,10 @@ const handleProfileSave = async () => {
           </div>
           <div className="cs-dashboard-header-right">
             <span className="cs-dashboard-welcome">
-              Welcome, <strong>{displayName}</strong>
+              <strong>Welcome, {displayName.split(" ")[0]}</strong>
             </span>
             <button
-              type="button"
+              type="button" 
               className="cs-btn cs-btn-outline cs-btn-sm"
               onClick={handleLogout}
             >
