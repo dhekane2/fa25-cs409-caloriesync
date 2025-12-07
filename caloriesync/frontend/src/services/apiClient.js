@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const apiClient = axios.create({
   // Use env variable first, fallback to localhost
-  baseURL: import.meta.env.BACKEND_API || "http://localhost:4000",
+  baseURL: "https://calsync-backend-5o0b.onrender.com", // "http://localhost:4000",
 
   withCredentials: true, // send cookies (access + refresh tokens)
 });
