@@ -21,10 +21,12 @@ const ACCESS_TOKEN_MAX_AGE = 2 * 60 * 1000; // 2 minutes in ms
 //   `fetch(..., { credentials: 'include' })` so cookies are sent with requests.
 // Example for production cross-site:
 //   const cookieOptions = { httpOnly: true, secure: true, sameSite: 'none', maxAge: ..., path: '/' }
+
+const isProd = process.env.NODE_ENV === 'production';
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
+  secure: isProd,
+  sameSite: isProd ? 'none' : 'lax',
   maxAge: REFRESH_TOKEN_MAX_AGE,
   path: '/'
 };
