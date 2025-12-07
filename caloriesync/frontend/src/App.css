@@ -133,11 +133,11 @@
 ================================ */
 
 .cs-landing-root {
-  padding-top: 0; /* Align the top area with header height */
+  padding-top: 0; 
   background: #ffffff;
 }
 
-/* Hero Section: top light-green gradient with larger height */
+/* Hero Section */
 .cs-hero {
   padding: 96px 0 80px;
   background: linear-gradient(to bottom, #ecfdf5 0%, #ffffff 65%);
@@ -172,12 +172,11 @@
   justify-content: center;
 }
 
-/* Shared section spacing */
 .cs-section {
   padding: 64px 0;
 }
 
-/* Features section: white background & 3 centered cards */
+/* Features section */
 .cs-section-features {
   background: #ffffff;
 }
@@ -241,7 +240,7 @@
   line-height: 1.5;
 }
 
-/* CTA section: full-width gradient block at the bottom */
+/* CTA section */
 .cs-section-cta {
   padding: 72px 0;
   background: linear-gradient(135deg, #22c55e, #2563eb);
@@ -266,7 +265,6 @@
   color: #e5e7eb;
 }
 
-/* Footer with dark background */
 .cs-footer {
   background: #020617;
   color: #9ca3af;
@@ -279,7 +277,6 @@
    AUTH PAGES — LOGIN / REGISTER
 ================================ */
 
-/* Green background for Login / Register pages */
 .cs-main-auth-bg {
   background: linear-gradient(to bottom, #e8fdf0, #f4fff8);
   min-height: 100vh;
@@ -289,17 +286,15 @@
   justify-content: center;
 }
 
-/* Center wrapper: shared by Login & Register */
 .cs-auth-wrapper {
   width: 100%;
-  max-width: 960px; /* overall content width */
+  max-width: 960px;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px 16px 60px;
 }
 
-/* Header used for both pages */
 .cs-register-header {
   text-align: center;
   margin-bottom: 24px;
@@ -332,7 +327,6 @@
   color: #64748b;
 }
 
-/* Base authentication card */
 .cs-auth-card {
   background: white;
   padding: 40px;
@@ -341,16 +335,13 @@
   width: 100%;
 }
 
-/* Wide card used by both Register & Login */
 .cs-auth-card-wide {
-  max-width: 960px; /* same as wrapper for balanced appearance */
+  max-width: 960px; 
   width: 100%;
   margin: 0 auto;
 }
 
 /* ---------- Login-specific layout ---------- */
-
-/* Outer wrapper for Login: controls overall block width */
 .cs-login-wrapper {
   width: 100%;
   max-width: 960px;
@@ -360,51 +351,44 @@
   padding: 40px 16px 60px;
 }
 
-/* Login card: slightly larger and more spacious */
 .cs-login-card {
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0px 4px 28px rgba(0, 0, 0, 0.07);
-  padding: 84px 96px; /* large comfortable spacing */
+  padding: 84px 96px; 
   width: 100%;
-  max-width: 980px; /* bigger card */
+  max-width: 980px; 
   margin: 0 auto;
   transition: width 0.25s ease;
 }
 
-/* Larger field labels for Login */
 .cs-login-card .cs-field-label {
   font-size: 16px;
   font-weight: 600;
 }
 
-/* Larger input fields */
 .cs-login-card .cs-input {
   font-size: 17px;
   padding: 14px 18px;
   border-radius: 12px;
 }
 
-/* Larger Login button */
 .cs-login-card .cs-btn {
   font-size: 18px;
   padding: 16px 0;
   border-radius: 12px;
 }
 
-/* Vertical layout with spacing */
 .cs-login-form {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-/* Expand login button to full width */
 .cs-btn-full {
   width: 100%;
 }
 
-/* Responsive adjustments */
 @media (max-width: 900px) {
   .cs-login-card {
     padding: 40px 32px;
@@ -412,7 +396,6 @@
   }
 }
 
-/* Old logo/title classes (kept for compatibility) */
 .cs-auth-logo {
   font-size: 20px;
   font-weight: 700;
@@ -432,7 +415,6 @@
   margin-bottom: 30px;
 }
 
-/* Grid layouts */
 .cs-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -448,7 +430,6 @@
   gap: 12px;
 }
 
-/* Input field wrapper */
 .cs-field {
   display: flex;
   flex-direction: column;
@@ -523,7 +504,6 @@
   border-radius: 8px;
 }
 
-/* Footer text under auth card */
 .cs-auth-footer-text {
   text-align: center;
   margin-top: 20px;
@@ -540,7 +520,6 @@
    DASHBOARD LAYOUT
 ================================ */
 
-/* Overall screen + internal header */
 .cs-dashboard-screen {
   min-height: 100vh;
   background: #f5f6f8;
@@ -1010,7 +989,6 @@
    TRACK CALORIES (SEARCH + MANUAL + LIST)
 ================================ */
 
-/* Whole page background for Track Calories */
 .cs-track-page {
   background: #f5f7fb;
   min-height: 100vh;
@@ -1018,7 +996,6 @@
   padding-bottom: 40px;
 }
 
-/* Header row with back button + title + date */
 .cs-track-header-row {
   display: flex;
   align-items: flex-start;
@@ -1072,7 +1049,6 @@
   padding-bottom: 40px;
 }
 
-/* Two-column layout: left — Search / Manual entry, right — meal list */
 .cs-track-grid {
   display: grid;
   grid-template-columns: 1.7fr 1.3fr;
@@ -1085,21 +1061,18 @@
   }
 }
 
-/* Softer cards on track page */
 .cs-track-card {
   border-radius: 24px;
   box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
   border: 1px solid #e5e7eb;
 }
 
-/* Left stacked cards */
 .cs-track-left {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-/* Search input gets a slightly larger height here */
 .cs-input-search {
   height: 44px;
 }
@@ -1132,14 +1105,12 @@
   background: #111827;
 }
 
-/* Optional small status under search */
 .cs-search-status {
   margin-top: 4px;
   font-size: 13px;
   color: #6b7280;
 }
 
-/* Search results container fills card nicely */
 .cs-search-results {
   margin-top: 10px;
   border-radius: 18px;
@@ -1149,7 +1120,6 @@
   background: transparent;
 }
 
-/* Individual result card */
 .cs-search-item-card {
   background: #f9fafb;
   border-radius: 18px;
@@ -1158,7 +1128,6 @@
   margin-bottom: 10px;
 }
 
-/* Header (name + calories/serving) inside search card */
 .cs-search-item-header {
   display: flex;
   justify-content: space-between;
@@ -1227,7 +1196,6 @@
   margin-top: 4px;
 }
 
-/* Quantity row + buttons */
 .cs-qty-row {
   display: inline-flex;
   align-items: center;
@@ -1256,7 +1224,6 @@
   text-align: center;
 }
 
-/* Manual add button full width */
 .cs-track-add-btn {
   margin-top: 4px;
   border-radius: 10px;
@@ -1301,20 +1268,18 @@
   border-radius: 10px;
 }
 
-/* Right side (qty + remove) */
 .cs-meal-actions {
   display: flex;
   flex-direction: row;
   align-items: center;
   gap: 8px;
-  white-space: nowrap; /* keeps qty + ✕ on same line */
+  white-space: nowrap; 
 }
 
 .cs-meal-remove-btn {
   padding-inline: 10px;
 }
 
-/* Empty state */
 .cs-empty-state {
   text-align: center;
   padding: 40px 0;
@@ -1360,7 +1325,6 @@
   font-size: 14px;
 }
 
-/* different background tints for each metric */
 .cs-nutrition-card-calories {
   background: #ecfdf5;
 }
