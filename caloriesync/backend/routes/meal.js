@@ -1,6 +1,7 @@
 import express from 'express';
 import { logMeal } from '../controllers/mealController.js';
 import { usdaSearch } from '../controllers/nutritionController.js';
+import { authenticateJWT } from '../middlewares/authMiddleware.js';
 
 const mealRouter = express.Router();
 

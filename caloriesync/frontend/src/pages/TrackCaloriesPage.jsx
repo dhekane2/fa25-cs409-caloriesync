@@ -1,7 +1,7 @@
 // src/pages/TrackCaloriesPage.jsx
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { searchUSDAFood } from '../services/api.js';
+import { searchUSDAFood, logMeal } from '../services/api.js';
 
 export default function TrackCaloriesPage() {
   const nav = useNavigate();
@@ -244,6 +244,10 @@ const [userEmail] = useState(() => {
 
     try {
       const total = totalCalories;
+
+      const loggedAt  = new Date(`${targetDate}T12:00:00.000Z`).toISOString();
+
+      await logMeal(mealList, loggedAt);
 
       // calorieData: summary per date
       const allCalorieData = JSON.parse(

@@ -8,7 +8,7 @@ import {
 
 const router = express.Router();
 
-router.get("/profile", authenticateJWT, getDashboardProfile);
+router.get("/profile", authenticateJWT,getDashboardProfile);
 router.get("/monthly", authenticateJWT, getMonthlyStats);
 router.get("/weekly", authenticateJWT, getWeeklyStats);
 
