@@ -14,9 +14,9 @@ There are three main problems we aim to address. First, users lack clear visibil
 
 ●	User Authentication: Each user can sign up, log in, and securely store personal data.
 
-●	Predicted Intake: The system estimates calorie requirements based on the user’s profile (including age, gender, and activity level) or allows users to input their planned meals.
+●	Predicted Intake: The system estimates calorie requirements based on the user’s profile (including age, gender, height and weight) or allows users to input their planned meals.
 
-●	Actual Intake Tracking: Users can log their actual meals using the Nutritionix API, which provides detailed nutritional information.
+●	Actual Intake Tracking: Users can log their actual meals using the USDA FoodData Central API, which provides detailed nutritional information.
 
 ●	Comparison & Analysis:
 1. Displays predicted versus actual calorie consumption through interactive visualizations (e.g., bar or line charts).
@@ -34,3 +34,4 @@ Yazio: Yazio provides meal planning and calorie tracking features but treats eac
 **How Our App is Different**
 
 Our app will be designed to stand out in some key ways. First, we focus on behavioral awareness rather than mere data entry, helping users understand their eating patterns instead of just recording numbers. Second, we aim to provide predictive insights and visual feedback on calorie deviations to make nutritional tracking more engaging and informative. Third, we employ a data-driven heuristic loop (predict, record, compare, then adjust) to promote continuous self-improvement. Finally, we will conduct a heuristic evaluation to refine the user experience and ensure clarity and usability in data visualization.
+
