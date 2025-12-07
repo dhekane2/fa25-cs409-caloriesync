@@ -12,6 +12,7 @@ import { corsOptions } from "./config/corsOption.js";
 import authRouter from "./routes/auth.js";
 import apiRouter from "./routes/index.js";
 import mealRouter from "./routes/meal.js";
+import dashboardRouter from "./routes/dashboard.js";
 
 import { authenticateJWT } from './middlewares/authMiddleware.js';
 
@@ -34,10 +35,14 @@ app.use(express.json());
 // #######################################
 // Routes
 // #######################################  
-app.use('/auth', authRouter);
 // Apply authentication middleware for all API routes mounted after this line.
 // This keeps authentication logic separate from auth routes (login/register/refresh).
+app.use('/auth', authRouter);
+
 app.use(authenticateJWT);
+
+
+app.use('/dashboard', dashboardRouter);   
 
 // this is a test api
 app.use('/user', apiRouter);

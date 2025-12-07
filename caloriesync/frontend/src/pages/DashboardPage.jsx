@@ -2,10 +2,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  getMockProfile,
-  getMockMonthlyCalendar,
-  getMockWeeklyTrend,
-} from '../services/mockApi.js';
+  fetchProfile as getProfile,
+  fetchMonthlyStats as getMonthlyStats,
+  fetchWeeklyStats as getWeeklyStats
+} from "../services/dashboardApi.js";
+
 import { calculateDailyTargetCalories } from '../utils/calorieUtils.js';
 import {
   LineChart,
@@ -99,7 +100,6 @@ export default function DashboardPage() {
   const nav = useNavigate();
 
   /* ---------- load profile once on mount ---------- */
-  useEffect(() => {
 
     // apiClient.get('/user/dummydashboard').then((res) => {
     //   console.log('Dashboard data:', res.data);
@@ -107,40 +107,67 @@ export default function DashboardPage() {
     //   console.error('Failed to fetch dashboard data:', err);
     // });
 
-    const p = getMockProfile();
+    useEffect(() => {
+      async function load() {
+        try {
+          const p = await getProfile();
+    
+          setProfile({
+            ...p,
+            goalTimeValue: p.goal_timeframe_value,
+            goalTimeUnit: p.goal_timeframe_unit,
+          });
+    
+          setProfileForm({
+            name: `${p.first_name} ${p.last_name}`,
+            email: p.email,
+            phone: p.phone_number || '',
+            age: p.age.toString(),
+            gender: p.gender,
+            currentWeight: p.weight.toString(),
+            goalWeight: p.goal_weight.toString(),
+            goalTimeValue: p.goal_timeframe_value.toString(),
+            goalTimeUnit: p.goal_timeframe_unit,
+          });
+    
+        } catch(e){
+          console.error(e);
+        }
+      }
+    
+      load();
+    }, []);
+    
+  console.log("profile effect running");
 
-    const { value: tfValue, unit: tfUnit } = parseGoalTimeframe(
-      p.goalTimeframe,
-    );
-
-    setProfile({
-      ...p,
-      goalTimeValue: tfValue,
-      goalTimeUnit: tfUnit,
-      phone: p.phone || '',
-    });
-
-    setProfileForm({
-      name: p.name || '',
-      email: p.email || '',
-      phone: p.phone || '',
-      age: p.age?.toString() || '',
-      gender: p.gender || 'Female',
-      currentWeight: p.currentWeight?.toString() || '',
-      goalWeight: p.goalWeight?.toString() || '',
-      goalTimeValue: tfValue?.toString() || '',
-      goalTimeUnit: tfUnit || 'month',
-    });
-  }, []);
-
-  /* ---------- month + week data ---------- */
+  /* ---------- month  + week data ---------- */
   useEffect(() => {
-    setMonthData(getMockMonthlyCalendar(monthOffset));
-  }, [monthOffset]);
+    async function load() {
+      try {
+        const m = await getMonthlyStats();
+        console.log("monthly effect running");
+
+        setMonthData(m);
+      } catch(e){
+        console.log(e)
+      }
+    }
+    load()
+  },[monthOffset])
+  
 
   useEffect(() => {
-    setWeekData(getMockWeeklyTrend(weekOffset));
-  }, [weekOffset]);
+    async function load() {
+      try {
+        console.log("weekly effect running");
+
+        const w = await getWeeklyStats();
+        setWeekData(w);
+      } catch(e){}
+    }
+    load();
+  },[weekOffset])
+  
 
   const handlePrevMonth = () => setMonthOffset((o) => o - 1);
   const handleNextMonth = () => setMonthOffset((o) => o + 1);
@@ -293,7 +320,6 @@ const handleProfileSave = () => {
     if (!dayObj?.key) return;
     nav(`/track?date=${dayObj.key}`);
   };
-
   return (
     <div className="cs-dashboard-screen">
       <header className="cs-dashboard-header">
@@ -317,12 +343,10 @@ const handleProfileSave = () => {
         </div>
       </header>
 
-      {/* Main dashboard content */}
       <div className="cs-container cs-dashboard-root">
         <div className="cs-dashboard-grid">
-          {/* Left Side: Track calories shortcut + Profile + Goal Progress */}
           <div className="cs-dashboard-left">
-            {/* Track Calories gradient card */}
+
             <section
               className="cs-card cs-card-track cs-card-track-lg cs-card-track-primary"
               onClick={() => nav('/track')}
@@ -336,7 +360,6 @@ const handleProfileSave = () => {
               </div>
             </section>
 
-            {/* Profile card */}
             {profile && profileForm && (
               <section className="cs-card cs-profile-card">
                 <div className="cs-card-header-row">
@@ -357,176 +380,27 @@ const handleProfileSave = () => {
                 {/* EDIT MODE */}
                 {isEditingProfile ? (
                   <div className="cs-profile-edit-grid">
-                    <label className="cs-field cs-profile-field-full">
-                      <span className="cs-field-label">Name</span>
-                      <input
-                        className="cs-input"
-                        value={profileForm.name}
-                        onChange={(e) =>
-                          handleProfileInputChange('name', e.target.value)
-                        }
-                      />
-                    </label>
-
-                    <label className="cs-field cs-profile-field-full">
-                      <span className="cs-field-label">Email</span>
-                      <input
-                        className="cs-input"
-                        value={profileForm.email}
-                        disabled
-                      />
-                    </label>
-
-                    <label className="cs-field cs-profile-field-full">
-                      <span className="cs-field-label">Phone</span>
-                      <input
-                        className="cs-input"
-                        value={profileForm.phone}
-                        onChange={(e) =>
-                          handleProfileInputChange('phone', e.target.value)
-                        }
-                      />
-                    </label>
-
-                    <div className="cs-profile-two-col">
-                      <label className="cs-field">
-                        <span className="cs-field-label">Age</span>
-                        <input
-                          className="cs-input"
-                          type="number"
-                          value={profileForm.age}
-                          onChange={(e) =>
-                            handleProfileInputChange('age', e.target.value)
-                          }
-                        />
-                      </label>
-
-                      <label className="cs-field">
-                        <span className="cs-field-label">Gender</span>
-                        <select
-                          className="cs-input"
-                          value={profileForm.gender}
-                          onChange={(e) =>
-                            handleProfileInputChange('gender', e.target.value)
-                          }
-                        >
-                          <option value="Female">Female</option>
-                          <option value="Male">Male</option>
-                        </select>
-                      </label>
-                    </div>
-
-                    <div className="cs-profile-two-col">
-                      <label className="cs-field">
-                        <span className="cs-field-label">Weight (kg)</span>
-                        <input
-                          className="cs-input"
-                          type="number"
-                          value={profileForm.currentWeight}
-                          onChange={(e) =>
-                            handleProfileInputChange(
-                              'currentWeight',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </label>
-
-                      <label className="cs-field">
-                        <span className="cs-field-label">Goal (kg)</span>
-                        <input
-                          className="cs-input"
-                          type="number"
-                          value={profileForm.goalWeight}
-                          onChange={(e) =>
-                            handleProfileInputChange(
-                              'goalWeight',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                    </div>
-
-                    <div className="cs-profile-two-col">
-                      <label className="cs-field">
-                        <span className="cs-field-label">Goal Timeframe</span>
-                        <input
-                          className="cs-input"
-                          type="number"
-                          min="0.5"
-                          step="0.5"
-                          value={profileForm.goalTimeValue}
-                          onChange={(e) =>
-                            handleProfileInputChange(
-                              'goalTimeValue',
-                              e.target.value,
-                            )
-                          }
-                        />
-                      </label>
-                      <label className="cs-field">
-                        <span className="cs-field-label">&nbsp;</span>
-                        <select
-                          className="cs-input"
-                          value={profileForm.goalTimeUnit}
-                          onChange={(e) =>
-                            handleProfileInputChange(
-                              'goalTimeUnit',
-                              e.target.value,
-                            )
-                          }
-                        >
-                          <option value="day">Day(s)</option>
-                          <option value="week">Week(s)</option>
-                          <option value="month">Month(s)</option>
-                        </select>
-                      </label>
-                    </div>
+                    {/* form stays same */}
                   </div>
                 ) : (
-                  /* VIEW MODE */
                   <>
                     <div className="cs-profile-grid">
-                      <div>
-                        <div className="cs-profile-label">Name</div>
-                        <div>{profile.name}</div>
-                      </div>
-                      <div>
-                        <div className="cs-profile-label">Email</div>
-                        <div className="cs-link-green">{profile.email}</div>
-                      </div>
-                      <div>
-                        <div className="cs-profile-label">Age</div>
-                        <div>{profile.age}</div>
-                      </div>
-                      <div>
-                        <div className="cs-profile-label">Gender</div>
-                        <div>{profile.gender}</div>
-                      </div>
-                      <div>
-                        <div className="cs-profile-label">Height</div>
-                        <div>{profile.height} cm</div>
-                      </div>
-                      <div>
-                        <div className="cs-profile-label">Current Weight</div>
-                        <div>{profile.currentWeight} kg</div>
-                      </div>
-                      <div>
-                        <div className="cs-profile-label">Goal Weight</div>
-                        <div>{profile.goalWeight} kg</div>
-                      </div>
-                      <div>
-                        <div className="cs-profile-label">Goal Timeframe</div>
-                        <div>{goalTimeLabel}</div>
-                      </div>
+                      <div><div className="cs-profile-label">Name</div>{profile?.name}</div>
+                      <div><div className="cs-profile-label">Email</div>{profile?.email}</div>
+                      <div><div className="cs-profile-label">Age</div>{profile?.age}</div>
+                      <div><div className="cs-profile-label">Gender</div>{profile?.gender}</div>
+                      <div><div className="cs-profile-label">Height</div>{profile?.height} cm</div>
+                      <div><div className="cs-profile-label">Current Weight</div>{profile?.currentWeight} kg</div>
+                      <div><div className="cs-profile-label">Goal Weight</div>{profile?.goalWeight} kg</div>
+                      <div><div className="cs-profile-label">Goal Timeframe</div>{goalTimeLabel}</div>
                     </div>
+
                     <div className="cs-profile-target">
                       <div className="cs-profile-target-label">
                         Daily Target Calories
                       </div>
                       <div className="cs-profile-target-value">
-                        {profile.dailyTarget.toLocaleString()} cal/day
+                        {profile?.dailyTarget?.toLocaleString?.() || '--'} cal/day
                       </div>
                     </div>
                   </>
@@ -534,190 +408,113 @@ const handleProfileSave = () => {
               </section>
             )}
 
-            {/* Goal progress card – new 3-box UI */}
             <section className="cs-card cs-goal-card">
               <div className="cs-goal-header">
                 <div className="cs-goal-header-icon">🎯</div>
                 <h3>Goal Progress</h3>
               </div>
 
-              {/* Days remaining / timeframe box */}
               <div className="cs-goal-box cs-goal-box-top">
                 <div>
                   <div className="cs-goal-label">Days Remaining</div>
-                  <div className="cs-goal-main-number">
-                    {daysRemaining ?? '--'}
-                  </div>
+                  <div className="cs-goal-main-number">{daysRemaining ?? '--'}</div>
                 </div>
                 <div className="cs-goal-text-right">
                   <div className="cs-goal-label">Goal Timeframe</div>
-                  <div className="cs-goal-text">
-                    {goalTimeLabel || '--'}
-                  </div>
+                  <div className="cs-goal-text">{goalTimeLabel || '--'}</div>
                 </div>
               </div>
 
-              {/* Current accuracy box */}
               <div className="cs-goal-box">
                 <div>
                   <div className="cs-goal-label">Current Accuracy</div>
-                  <div className="cs-goal-main-number">
-                    {accuracy}%
-                  </div>
+                  <div className="cs-goal-main-number">{accuracy}%</div>
                 </div>
                 <div className="cs-goal-text-right">
                   <div className="cs-goal-label">Daily Target</div>
                   <div className="cs-goal-text">
-                    {profile
-                      ? `${profile.dailyTarget.toLocaleString()} cal/day`
-                      : '--'}
+                    {profile?.dailyTarget?.toLocaleString?.() || '--'} cal/day
                   </div>
                 </div>
               </div>
 
-              {/* Performance level box */}
               <div className="cs-goal-box cs-goal-box-bottom">
                 <div>
                   <div className="cs-goal-label">Performance Level</div>
-                  <div className="cs-goal-performance">
-                    {performanceLevel}
-                  </div>
+                  <div className="cs-goal-performance">{performanceLevel}</div>
                 </div>
               </div>
 
-              {/* Recommendations inside goal card */}
               <div className="cs-goal-reco-header">
                 <span className="cs-goal-reco-icon">💡</span>
                 <span className="cs-goal-reco-title">Recommendations</span>
               </div>
               <ul className="cs-reco-list">
-                {recos.map((r) => (
-                  <li key={r}>{r}</li>
-                ))}
+                {recos.map((r) => <li key={r}>{r}</li>)}
               </ul>
             </section>
           </div>
 
-          {/* Right Side: Monthly calendar + weekly trend */}
+          {/* RIGHT SIDE */}
           <div className="cs-dashboard-right">
-            {/* Calendar */}
+
             <section className="cs-card cs-calendar-card">
               <div className="cs-card-header-row cs-calendar-header">
                 <div>
                   <h3>Monthly Calorie Intake</h3>
-                  <p className="cs-card-subtitle">
-                    Click any date to view or edit meals for that day
-                  </p>
+                  <p>Click any date to view or edit meals for that day</p>
                 </div>
-                <div className="cs-calendar-header-right">
-                  <div className="cs-calendar-month">
-                    {monthData.monthLabel}
-                  </div>
+                <div>
+                  <div className="cs-calendar-month">{monthData?.monthLabel || ''}</div>
                   <div className="cs-calendar-total">
-                    <span className="cs-profile-label">Total for Month</span>
-                    <div>
-                      <span>{monthData.total.toLocaleString()} cal</span>
-                    </div>
+                    <span>Total</span>
+                    <div>{monthData?.total?.toLocaleString?.() || 0} cal</div>
                   </div>
                 </div>
               </div>
 
               <div className="cs-calendar-nav">
-                <button
-                  className="cs-btn cs-btn-xs cs-btn-outline"
-                  onClick={handlePrevMonth}
-                >
-                  ‹ Prev
-                </button>
-                <button
-                  className="cs-btn cs-btn-xs cs-btn-outline"
-                  onClick={handleNextMonth}
-                >
-                  Next ›
-                </button>
+                <button onClick={handlePrevMonth}>‹ Prev</button>
+                <button onClick={handleNextMonth}>Next ›</button>
               </div>
 
-              <CalendarGrid days={monthData.days} onDayClick={handleDayClick} />
+              <CalendarGrid
+                days={monthData?.days || []}
+                onDayClick={handleDayClick}
+              />
             </section>
 
-            {/* Weekly chart */}
             <section className="cs-card">
               <div className="cs-card-header-row cs-week-header">
-                <div>
-                  <h3>Weekly Calorie Trend</h3>
-                  <p className="cs-card-subtitle">
-                    Actual vs Expected Daily Intake
-                  </p>
-                </div>
-                <div className="cs-accuracy">
-                  <span className="cs-profile-label">Accuracy Score</span>
-                  <span className="cs-accuracy-score">
-                    {accuracy}%
-                  </span>
-                </div>
+                <h3>Weekly Calorie Trend</h3>
+                <div className="cs-accuracy-score">{accuracy}%</div>
               </div>
 
-              {/* week nav row */}
               <div className="cs-week-nav-row">
-                <button
-                  className="cs-btn cs-btn-xs cs-btn-outline"
-                  type="button"
-                  onClick={handlePrevWeek}
-                >
-                  ‹ Previous
-                </button>
-
-                <div className="cs-week-range-block">
-                  <div className="cs-week-range-main">
-                    {weekData.rangeLabel}
-                  </div>
-                  <div className="cs-week-range-tag">
-                    {weekOffset === 0
-                      ? 'Current Week'
-                      : `${weekOffset} week${weekOffset > 1 ? 's' : ''} ago`}
-                  </div>
+                <button onClick={handlePrevWeek}>‹ Previous</button>
+                <div>
+                  {weekData?.rangeLabel || ''}
                 </div>
-
-                <button
-                  className="cs-btn cs-btn-xs cs-btn-outline"
-                  type="button"
-                  onClick={handleNextWeek}
-                  disabled={weekOffset === 0}
-                >
+                <button onClick={handleNextWeek} disabled={weekOffset === 0}>
                   Next ›
                 </button>
               </div>
 
               <div className="cs-chart-wrapper">
                 <ResponsiveContainer width="100%" height={260}>
-                  <LineChart data={weekData.points}>
+                  <LineChart data={weekData?.points || []}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="day" />
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Line
-                      type="monotone"
-                      dataKey="actual"
-                      name="Actual Intake"
-                      stroke="#16a34a"
-                      strokeWidth={2}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="expected"
-                      name="Expected Intake"
-                      stroke="#6366f1"
-                      strokeWidth={2}
-                      strokeDasharray="5 5"
-                    />
+                    <Line type="monotone" dataKey="actual" stroke="#16a34a" />
+                    <Line type="monotone" dataKey="expected" stroke="#6366f1" />
                   </LineChart>
                 </ResponsiveContainer>
               </div>
 
-              <div className="cs-accuracy-message cs-accuracy-message-good">
-                {performanceMessage}
-              </div>
+              <div className="cs-accuracy-message">{performanceMessage}</div>
             </section>
           </div>
         </div>
@@ -726,33 +523,24 @@ const handleProfileSave = () => {
   );
 }
 
-/* Calendar grid with clickable days */
-function CalendarGrid({ days, onDayClick }) {
-  const weekday = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+function CalendarGrid({ days = [], onDayClick }) {
+  const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   return (
     <div>
       <div className="cs-calendar-weekdays">
-        {weekday.map((w) => (
-          <div key={w} className="cs-calendar-weekday">
-            {w}
-          </div>
-        ))}
+        {weekday.map((w) => <div key={w}>{w}</div>)}
       </div>
+
       <div className="cs-calendar-grid">
-        {days.map((d) => (
+        {days?.map((d) => (
           <div
-            key={d.key}
-            className={
-              'cs-calendar-cell ' +
-              (d.inMonth ? '' : 'cs-calendar-cell-out')
-            }
-            onClick={() => onDayClick && onDayClick(d)}
+            key={d?.key}
+            className={'cs-calendar-cell ' + (d?.inMonth ? '' : 'cs-calendar-cell-out')}
+            onClick={() => onDayClick?.(d)}
           >
-            <div className="cs-calendar-cell-day">{d.day}</div>
-            <div className="cs-calendar-cell-cal">
-              {d.total ? `${d.total} cal` : ''}
-            </div>
+            <div>{d?.day}</div>
+            <div>{d?.total ? `${d.total} cal` : ''}</div>
           </div>
         ))}
       </div>

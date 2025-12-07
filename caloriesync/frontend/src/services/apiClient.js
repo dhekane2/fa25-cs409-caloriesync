@@ -1,7 +1,9 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'http://localhost:4000',
+  // Use env variable first, fallback to localhost
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:4000",
+
   withCredentials: true, // send cookies (access + refresh tokens)
 });
 
@@ -43,13 +45,22 @@ apiClient.interceptors.response.use(
 
     originalRequest._retry = true;
 
+    // begin refreshing logic
     if (!isRefreshing) {
       isRefreshing = true;
+
       try {
         // This uses the refreshToken cookie to issue a new accessToken cookie
-        await apiClient.post('/auth/refresh');
+        // NOTE: must include empty body + explicit withCredentials
+        await apiClient.post(
+          '/auth/refresh',
+          {},                 // <-- body
+          { withCredentials: true } // <-- ensure cookie is sent
+        );
+
         isRefreshing = false;
         resolvePendingRequests();
+
       } catch (refreshError) {
         isRefreshing = false;
         resolvePendingRequests(refreshError);
@@ -63,7 +74,7 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Queue this request until the refresh call completes
+    // Queue this request until the refresh completes
     return new Promise((resolve, reject) => {
       enqueueRequest((refreshError) => {
         if (refreshError) {

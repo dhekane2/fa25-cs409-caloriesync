@@ -21,8 +21,12 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
-      await apiClient.post('/auth/login', { email, password });
-
+      await apiClient.post(
+        '/auth/login', 
+        { email, password },
+        { withCredentials: true }
+      );
+      
       nav('/dashboard');
     } catch (err) {
       const message =
