@@ -16,9 +16,8 @@ export default function LandingPage() {
             </h1>
 
             <p className="cs-hero-subtitle">
-              CalorieSync helps you monitor your daily calorie intake and
-              expenditure, providing insights to help you reach your target
-              weight.
+              CalorieSync helps you monitor your daily calorie intake,
+              providing insights to help you reach your target weight.
             </p>
 
             <div className="cs-hero-actions">
@@ -52,7 +51,7 @@ export default function LandingPage() {
               </div>
               <h3 className="cs-feature-title">Track Your Progress</h3>
               <p className="cs-feature-text">
-                Visualize your calorie consumption and burn rate with detailed
+                Visualize your calorie consumption with detailed
                 weekly and monthly charts.
               </p>
             </div>
@@ -63,8 +62,8 @@ export default function LandingPage() {
               </div>
               <h3 className="cs-feature-title">Log Daily Activities</h3>
               <p className="cs-feature-text">
-                Record your daily activities and track calories burned from
-                exercise and daily routines.
+                Record your activities and track calories from
+                daily routines.
               </p>
             </div>
 
