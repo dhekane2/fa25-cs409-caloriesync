@@ -24,7 +24,7 @@ export function calculateDailyTargetCalories(
     return 0;
   }
 
-  // 1. Convert timeframe to days
+  // Convert timeframe to days
   let days = timeValue;
   switch (timeUnit) {
     case 'day':
@@ -41,7 +41,7 @@ export function calculateDailyTargetCalories(
       days = timeValue * 30;
   }
 
-  // 2. Maintenance calories using EER (DRI style)
+  // Maintenance calories using EER (DRI style)
   const heightM = heightCm / 100;
   const isFemale = String(gender).toLowerCase() === 'female';
 
@@ -62,7 +62,7 @@ export function calculateDailyTargetCalories(
       662 - 9.53 * age + PA * (15.91 * currentWeight + 539.6 * heightM);
   }
 
-  // 3. Weight-change calories: 7700 kcal per kg
+  // Weight-change calories: 7700 kcal per kg
   const diffKg = currentWeight - goalWeight; // positive = weight loss
   const totalCalChange = diffKg * 7700;
   const dailyChange = totalCalChange / days;
@@ -70,9 +70,9 @@ export function calculateDailyTargetCalories(
   // Use half of the theoretical daily change to avoid extreme targets
   const adjustedDailyChange = dailyChange / 2;
 
-  // Weight loss → target < maintenance; weight gain → target > maintenance
+  // Weight loss: target < maintenance; weight gain: target > maintenance
   const rawTarget = maintenanceEER - adjustedDailyChange;
 
-  // 4. Safety floor: at least 1200 kcal/day
+  // Safety floor: at least 1200 kcal/day
   return Math.max(1200, Math.round(rawTarget));
 }
