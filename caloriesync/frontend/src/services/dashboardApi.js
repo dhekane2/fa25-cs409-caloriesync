@@ -1,25 +1,28 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import apiClient from "./apiClient";
 
 export async function fetchProfile() {
-  const r = await fetch(`${API_URL}/dashboard/profile`, {
-    credentials: "include"
-  });
-  if (!r.ok) throw new Error("Failed to fetch profile");
-  return await r.json();
+  const res = await apiClient.get('/dashboard/profile');
+  return res.data;
 }
 
-export async function fetchMonthlyStats() {
-  const r = await fetch(`${API_URL}/dashboard/monthly`, {
-    credentials: "include"
-  });
-  if (!r.ok) throw new Error("Failed to fetch month");
-  return await r.json();
+export async function updateProfile(profilePayload) {
+  const res = await apiClient.patch('/dashboard/profile', profilePayload);
+  return res.data;
 }
 
-export async function fetchWeeklyStats() {
-  const r = await fetch(`${API_URL}/dashboard/weekly`, {
-    credentials: "include"
+export async function fetchMonthlyStats(year, month) {
+  const res = await apiClient.get('/dashboard/monthly', {
+    params: {
+      year: String(year),
+      month: String(month).padStart(2, '0'),
+    },
   });
-  if (!r.ok) throw new Error("Failed to fetch week");
-  return await r.json();
+  return res.data;
+}
+
+export async function fetchWeeklyStats(startDate) {
+  const res = await apiClient.get('/dashboard/weekly', {
+    params: { start_date: startDate },
+  });
+  return res.data;
 }

@@ -3,9 +3,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   fetchProfile as getProfile,
+  updateProfile as saveProfile,
   fetchMonthlyStats as getMonthlyStats,
   fetchWeeklyStats as getWeeklyStats
 } from "../services/dashboardApi.js";
+
+import apiClient from '../services/apiClient.js';
 
 import { calculateDailyTargetCalories } from '../utils/calorieUtils.js';
 import {
@@ -20,7 +23,6 @@ import {
 } from 'recharts';
 import axios from 'axios';
 
-import apiClient from '../services/apiClient.js';
 
 /* ---------- helpers for timeframe & goal progress ---------- */
 
@@ -101,42 +103,72 @@ export default function DashboardPage() {
 
   /* ---------- load profile once on mount ---------- */
 
-    // apiClient.get('/user/dummydashboard').then((res) => {
-    //   console.log('Dashboard data:', res.data);
-    // }).catch((err) => {
-    //   console.error('Failed to fetch dashboard data:', err);
-    // });
+  // apiClient.get('/user/dummydashboard').then((res) => {
+  //   console.log('Dashboard data:', res.data);
+  // }).catch((err) => {
+  //   console.error('Failed to fetch dashboard data:', err);
+  // });
 
-    useEffect(() => {
-      async function load() {
-        try {
-          const p = await getProfile();
-    
-          setProfile({
-            ...p,
-            goalTimeValue: p.goal_timeframe_value,
-            goalTimeUnit: p.goal_timeframe_unit,
-          });
-    
-          setProfileForm({
-            name: `${p.first_name} ${p.last_name}`,
-            email: p.email,
-            phone: p.phone_number || '',
-            age: p.age.toString(),
-            gender: p.gender,
-            currentWeight: p.weight.toString(),
-            goalWeight: p.goal_weight.toString(),
-            goalTimeValue: p.goal_timeframe_value.toString(),
-            goalTimeUnit: p.goal_timeframe_unit,
-          });
-    
-        } catch(e){
-          console.error(e);
-        }
+  useEffect(() => {
+    async function load() {
+      try {
+        const p = await getProfile();
+
+        const name = `${p.first_name || ''} ${p.last_name || ''}`.trim();
+
+        const currentWeight = p.weight;
+        const goalWeight = p.goal_weight;
+        const goalTimeValue = p.goal_timeframe_value;
+
+        const rawUnit = p.goal_timeframe_unit || 'months';
+        const lowerUnit = rawUnit.toLowerCase();
+        let goalTimeUnit = 'month';
+        if (lowerUnit.startsWith('day')) goalTimeUnit = 'day';
+        else if (lowerUnit.startsWith('week')) goalTimeUnit = 'week';
+
+        const goalTimeframe = `${goalTimeValue} ${rawUnit}`;
+
+        const dailyTarget = calculateDailyTargetCalories(
+          currentWeight,
+          goalWeight,
+          goalTimeValue,
+          goalTimeUnit,
+          p.age,
+          p.gender,
+          p.height,
+        );
+
+        setProfile({
+          ...p,
+          name,
+          currentWeight,
+          goalWeight,
+          goalTimeValue,
+          goalTimeUnit,
+          goalTimeframe,
+          dailyTarget,
+        });
+
+        setProfileForm({
+          name,
+          email: p.email,
+          phone: p.phone_number || '',
+          age: p.age != null ? p.age.toString() : '',
+          gender: p.gender || '',
+          currentWeight:
+            currentWeight != null ? currentWeight.toString() : '',
+          goalWeight: goalWeight != null ? goalWeight.toString() : '',
+          goalTimeValue:
+            goalTimeValue != null ? goalTimeValue.toString() : '',
+          goalTimeUnit,
+        });
+      } catch (e) {
+        console.error(e);
       }
-    
-      load();
-    }, []);
+    }
+
+    load();
+  }, []);
     
   console.log("profile effect running");
 
@@ -144,10 +176,38 @@ export default function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const m = await getMonthlyStats();
+        const now = new Date();
+        const base = new Date(
+          now.getFullYear(),
+          now.getMonth() + monthOffset,
+        )
+        const year = base.getFullYear();
+        const month = base.getMonth() + 1; // 1-12
+
+        const raw = await getMonthlyStats(year, month);
+
+        const monthLabel = base.toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+        });
+
+
+
+        const days = (raw.days || []).map((d) => {
+          const dateObj = new Date(d.date + "T00:00:00");
+          return {
+          key: d.date,
+          inMonth: d.in_current_month,
+          day: dateObj.getDate(),
+          total: d.total_calories || 0,
+        }
+        });
+        
+        const total = days.reduce((sum, d) => sum + (d.total || 0), 0);
+
+        setMonthData({monthLabel, total, days});
         console.log("monthly effect running");
 
-        setMonthData(m);
       } catch(e){
         console.log(e)
       }
@@ -156,17 +216,65 @@ export default function DashboardPage() {
   },[monthOffset])
   
 
+  // useEffect(() => {
+  //   async function load() {
+  //     try {
+  //       console.log("weekly effect running");
+
+  //       const w = await getWeeklyStats();
+  //       setWeekData(w);
+  //     } catch(e){}
+  //   }
+  //   load();
+  // },[weekOffset])
+
   useEffect(() => {
     async function load() {
       try {
-        console.log("weekly effect running");
+        const today = new Date();
+        const start = new Date(today);
 
-        const w = await getWeeklyStats();
-        setWeekData(w);
-      } catch(e){}
+        // Use Monday as start of week; move back by weekOffset weeks
+        const dayOfWeek = start.getDay(); // 0 = Sun ... 6 = Sat
+        const diffToMonday = (dayOfWeek + 6) % 7;
+        start.setDate(start.getDate() - diffToMonday - weekOffset * 7);
+
+        const startDateStr = start.toISOString().slice(0, 10); // YYYY-MM-DD
+
+        const raw = await getWeeklyStats(startDateStr);
+
+        // raw: { week_start, week_end, days: [{ date, total_calories }] }
+        const end = new Date(raw.week_end + "T00:00:00");
+        const rangeLabel = `${start.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })} – ${end.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        })}`;
+
+        const expected = profile?.dailyTarget || 0;
+
+        const points = (raw.days || []).map((d) => {
+          const dateObj = new Date(d.date + "T00:00:00");
+          return {
+            day: dateObj.toLocaleDateString("en-US", { weekday: "short" }),
+            actual: d.total_calories || 0,
+            expected,
+          };
+        });
+
+        setWeekData({
+          rangeLabel,
+          accuracy: 0, // computeDynamicAccuracy will override based on points + profile
+          points,
+        });
+      } catch (e) {
+        console.error(e);
+      }
     }
     load();
-  },[weekOffset])
+  }, [weekOffset, profile]);
   
 
   const handlePrevMonth = () => setMonthOffset((o) => o - 1);
@@ -178,11 +286,7 @@ export default function DashboardPage() {
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        'http://localhost:4000/auth/logout',
-        {},
-        { withCredentials: true },
-      );
+      await apiClient.post('/auth/logout');
     } catch (err) {
       console.error('Logout failed:', err);
     } finally {
@@ -202,7 +306,7 @@ export default function DashboardPage() {
     }));
   };
 
-const handleProfileSave = () => {
+const handleProfileSave = async () => {
   if (!profile || !profileForm) return;
 
   const goalTimeValueNum = parseFloat(profileForm.goalTimeValue) || 0;
@@ -243,36 +347,62 @@ const handleProfileSave = () => {
     updated.height,
   );
 
-  // 1) Update React state so the UI changes immediately
-  setProfile(updated);
-  setIsEditingProfile(false);
-
-  // 2) Persist to localStorage so future visits use the new goal
+  // 1) Persist to backend
   try {
-    const raw = localStorage.getItem('cs_profile');
-    const stored = raw ? JSON.parse(raw) : {};
-
-    const updatedStored = {
-      ...stored,
-      // fields used by getMockProfile
+    const payload = {
       name: updated.name,
       email: updated.email,
       phone: updated.phone,
       age: updated.age,
       gender: updated.gender,
       height: updated.height,
-      // note: getMockProfile reads `weight` for current weight
-      weight: updated.currentWeight,
+      currentWeight: updated.currentWeight,
       goalWeight: updated.goalWeight,
       goalTimeValue: updated.goalTimeValue,
       goalTimeUnit: updated.goalTimeUnit,
-      goalTimeframe: updated.goalTimeframe,
-      dailyTarget: updated.dailyTarget,
     };
 
-    localStorage.setItem('cs_profile', JSON.stringify(updatedStored));
+    const saved = await saveProfile(payload);
+
+    // Re-normalize backend response into our profile shape
+    const name = `${saved.first_name || ''} ${saved.last_name || ''}`.trim();
+    const currentWeight = saved.weight;
+    const goalWeight = saved.goal_weight;
+    const goalTimeValue = saved.goal_timeframe_value;
+
+    const rawUnit = saved.goal_timeframe_unit || 'months';
+    const lowerUnit = rawUnit.toLowerCase();
+    let goalTimeUnit = 'month';
+    if (lowerUnit.startsWith('day')) goalTimeUnit = 'day';
+    else if (lowerUnit.startsWith('week')) goalTimeUnit = 'week';
+
+    const goalTimeframe = `${goalTimeValue} ${rawUnit}`;
+
+    const dailyTarget = calculateDailyTargetCalories(
+      currentWeight,
+      goalWeight,
+      goalTimeValue,
+      goalTimeUnit,
+      saved.age,
+      saved.gender,
+      saved.height,
+    );
+
+    const normalized = {
+      ...saved,
+      name,
+      currentWeight,
+      goalWeight,
+      goalTimeValue,
+      goalTimeUnit,
+      goalTimeframe,
+      dailyTarget,
+    };
+
+    setProfile(normalized);
+    setIsEditingProfile(false);
   } catch (err) {
-    console.error('Failed to persist profile to localStorage', err);
+    console.error('Failed to update profile', err);
   }
 };
 
@@ -306,9 +436,9 @@ const handleProfileSave = () => {
     ];
   } else if (performanceLevel === 'Far from Goal') {
     performanceMessage =
-      "Don't get discouraged—building healthy habits takes time!";
+      "Don't get discouraged. Building healthy habits takes time!";
     recos = [
-      "Don't get discouraged—building healthy habits takes time!",
+      "Don't get discouraged. Building healthy habits takes time!",
       'Start with small, achievable daily calorie targets.',
       'Track every meal and snack to understand your eating patterns.',
     ];
@@ -330,10 +460,10 @@ const handleProfileSave = () => {
           </div>
           <div className="cs-dashboard-header-right">
             <span className="cs-dashboard-welcome">
-              Welcome, <strong>{displayName}</strong>
+              <strong>Welcome, {displayName.split(" ")[0]}</strong>
             </span>
             <button
-              type="button"
+              type="button" 
               className="cs-btn cs-btn-outline cs-btn-sm"
               onClick={handleLogout}
             >
@@ -380,7 +510,121 @@ const handleProfileSave = () => {
                 {/* EDIT MODE */}
                 {isEditingProfile ? (
                   <div className="cs-profile-edit-grid">
-                    {/* form stays same */}
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Name</span>
+                      <input
+                        className="cs-input"
+                        value={profileForm.name}
+                        onChange={(e) =>
+                          handleProfileInputChange('name', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Email</span>
+                      <input
+                        className="cs-input"
+                        type="email"
+                        value={profileForm.email}
+                        onChange={(e) =>
+                          handleProfileInputChange('email', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Phone</span>
+                      <input
+                        className="cs-input"
+                        value={profileForm.phone}
+                        onChange={(e) =>
+                          handleProfileInputChange('phone', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Age</span>
+                      <input
+                        className="cs-input"
+                        type="number"
+                        min="1"
+                        value={profileForm.age}
+                        onChange={(e) =>
+                          handleProfileInputChange('age', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Gender</span>
+                      <select
+                        className="cs-input"
+                        value={profileForm.gender}
+                        onChange={(e) =>
+                          handleProfileInputChange('gender', e.target.value)
+                        }
+                      >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                      </select>
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Current Weight (kg)</span>
+                      <input
+                        className="cs-input"
+                        type="number"
+                        min="0"
+                        value={profileForm.currentWeight}
+                        onChange={(e) =>
+                          handleProfileInputChange('currentWeight', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Goal Weight (kg)</span>
+                      <input
+                        className="cs-input"
+                        type="number"
+                        min="0"
+                        value={profileForm.goalWeight}
+                        onChange={(e) =>
+                          handleProfileInputChange('goalWeight', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Goal Timeframe</span>
+                      <div className="cs-goal-time-row">
+                        <input
+                          className="cs-input cs-goal-time-value"
+                          type="number"
+                          min="1"
+                          value={profileForm.goalTimeValue}
+                          onChange={(e) =>
+                            handleProfileInputChange('goalTimeValue', e.target.value)
+                          }
+                        />
+                        <select
+                          className="cs-input cs-goal-time-unit"
+                          value={profileForm.goalTimeUnit}
+                          onChange={(e) =>
+                            handleProfileInputChange('goalTimeUnit', e.target.value)
+                          }
+                        >
+                          <option value="day">days</option>
+                          <option value="week">weeks</option>
+                          <option value="month">months</option>
+                        </select>
+                      </div>
+                    </label>
                   </div>
                 ) : (
                   <>

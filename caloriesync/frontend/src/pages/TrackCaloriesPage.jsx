@@ -1,7 +1,11 @@
 // src/pages/TrackCaloriesPage.jsx
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { searchUSDAFood } from '../services/api.js';
+import {
+  searchUSDAFood,
+  fetchMealsForDate,
+  createOrReplaceMeal,
+} from '../services/api.js';
 
 export default function TrackCaloriesPage() {
   const nav = useNavigate();
@@ -54,21 +58,45 @@ const [userEmail] = useState(() => {
   const totalFat = mealList.reduce((s, i) => s + (i.fat || 0), 0);
   const totalCarbs = mealList.reduce((s, i) => s + (i.carbs || 0), 0);
 
-  // --- load existing meals for this date from localStorage ---
+  // --- load existing meals for this date (only when editing a specific date) ---
   useEffect(() => {
-    if (!userEmail) return;
+    // Only fetch from backend when editing an existing date via calendar
+    if (!selectedDate) {
+      setMealList([]);
+      return;
+    }
 
-    const allMeals = JSON.parse(localStorage.getItem('meals') || '{}');
-    const userMeals = allMeals[userEmail] || [];
+    async function load() {
+      try {
+        const data = await fetchMealsForDate(targetDate);
+        const items = (data.items || []).map((item) => {
+          const qty = item.quantity ?? 1;
+          const totalCals = item.calorie_count ?? 0;
+          const baseCalories = qty ? totalCals / qty : totalCals;
 
-    const dateMeals = userMeals.filter((m) => m.date === targetDate);
-    const items = [];
-    dateMeals.forEach((m) => {
-      if (Array.isArray(m.items)) items.push(...m.items);
-    });
+          return {
+            id: item.id,
+            food_name: item.item_name,
+            calories: totalCals,
+            protein: 0,
+            fat: 0,
+            carbs: 0,
+            quantity: qty,
+            serving_unit: 'serving',
+            source: 'db',
+            baseCalories,
+          };
+        });
 
-    setMealList(items);
-  }, [userEmail, targetDate]);
+        setMealList(items);
+      } catch (err) {
+        console.error('Failed to fetch meals for date:', err);
+        setMealList([]);
+      }
+    }
+
+    load();
+  }, [selectedDate, targetDate]);
 
   // --- perform search function ---
   const performSearch = async (query) => {
@@ -244,6 +272,9 @@ const [userEmail] = useState(() => {
 
     try {
       const total = totalCalories;
+
+      const loggedAt = targetDate; // YYYY-MM-DD
+      await createOrReplaceMeal(mealList, loggedAt);
 
       // calorieData: summary per date
       const allCalorieData = JSON.parse(
