@@ -45,7 +45,7 @@ export default function RegisterPage() {
       goalTimeUnit,
     } = form;
 
-    // 1. Required fields (phone is optional)
+    // Required fields (phone is optional)
     if (
       !firstName.trim() ||
       !lastName.trim() ||
@@ -63,7 +63,7 @@ export default function RegisterPage() {
       return;
     }
 
-    // 2. Password match check
+    // Password match check
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
