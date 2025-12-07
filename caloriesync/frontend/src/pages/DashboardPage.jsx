@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   fetchProfile as getProfile,
+  updateProfile as saveProfile,
   fetchMonthlyStats as getMonthlyStats,
   fetchWeeklyStats as getWeeklyStats
 } from "../services/dashboardApi.js";
@@ -305,7 +306,7 @@ export default function DashboardPage() {
     }));
   };
 
-const handleProfileSave = () => {
+const handleProfileSave = async () => {
   if (!profile || !profileForm) return;
 
   const goalTimeValueNum = parseFloat(profileForm.goalTimeValue) || 0;
@@ -346,36 +347,62 @@ const handleProfileSave = () => {
     updated.height,
   );
 
-  // 1) Update React state so the UI changes immediately
-  setProfile(updated);
-  setIsEditingProfile(false);
-
-  // 2) Persist to localStorage so future visits use the new goal
+  // 1) Persist to backend
   try {
-    const raw = localStorage.getItem('cs_profile');
-    const stored = raw ? JSON.parse(raw) : {};
-
-    const updatedStored = {
-      ...stored,
-      // fields used by getMockProfile
+    const payload = {
       name: updated.name,
       email: updated.email,
       phone: updated.phone,
       age: updated.age,
       gender: updated.gender,
       height: updated.height,
-      // note: getMockProfile reads `weight` for current weight
-      weight: updated.currentWeight,
+      currentWeight: updated.currentWeight,
       goalWeight: updated.goalWeight,
       goalTimeValue: updated.goalTimeValue,
       goalTimeUnit: updated.goalTimeUnit,
-      goalTimeframe: updated.goalTimeframe,
-      dailyTarget: updated.dailyTarget,
     };
 
-    localStorage.setItem('cs_profile', JSON.stringify(updatedStored));
+    const saved = await saveProfile(payload);
+
+    // Re-normalize backend response into our profile shape
+    const name = `${saved.first_name || ''} ${saved.last_name || ''}`.trim();
+    const currentWeight = saved.weight;
+    const goalWeight = saved.goal_weight;
+    const goalTimeValue = saved.goal_timeframe_value;
+
+    const rawUnit = saved.goal_timeframe_unit || 'months';
+    const lowerUnit = rawUnit.toLowerCase();
+    let goalTimeUnit = 'month';
+    if (lowerUnit.startsWith('day')) goalTimeUnit = 'day';
+    else if (lowerUnit.startsWith('week')) goalTimeUnit = 'week';
+
+    const goalTimeframe = `${goalTimeValue} ${rawUnit}`;
+
+    const dailyTarget = calculateDailyTargetCalories(
+      currentWeight,
+      goalWeight,
+      goalTimeValue,
+      goalTimeUnit,
+      saved.age,
+      saved.gender,
+      saved.height,
+    );
+
+    const normalized = {
+      ...saved,
+      name,
+      currentWeight,
+      goalWeight,
+      goalTimeValue,
+      goalTimeUnit,
+      goalTimeframe,
+      dailyTarget,
+    };
+
+    setProfile(normalized);
+    setIsEditingProfile(false);
   } catch (err) {
-    console.error('Failed to persist profile to localStorage', err);
+    console.error('Failed to update profile', err);
   }
 };
 
@@ -483,7 +510,121 @@ const handleProfileSave = () => {
                 {/* EDIT MODE */}
                 {isEditingProfile ? (
                   <div className="cs-profile-edit-grid">
-                    {/* form stays same */}
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Name</span>
+                      <input
+                        className="cs-input"
+                        value={profileForm.name}
+                        onChange={(e) =>
+                          handleProfileInputChange('name', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Email</span>
+                      <input
+                        className="cs-input"
+                        type="email"
+                        value={profileForm.email}
+                        onChange={(e) =>
+                          handleProfileInputChange('email', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Phone</span>
+                      <input
+                        className="cs-input"
+                        value={profileForm.phone}
+                        onChange={(e) =>
+                          handleProfileInputChange('phone', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Age</span>
+                      <input
+                        className="cs-input"
+                        type="number"
+                        min="1"
+                        value={profileForm.age}
+                        onChange={(e) =>
+                          handleProfileInputChange('age', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Gender</span>
+                      <select
+                        className="cs-input"
+                        value={profileForm.gender}
+                        onChange={(e) =>
+                          handleProfileInputChange('gender', e.target.value)
+                        }
+                      >
+                        <option value="">Select</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                        <option value="prefer_not_to_say">Prefer not to say</option>
+                      </select>
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Current Weight (kg)</span>
+                      <input
+                        className="cs-input"
+                        type="number"
+                        min="0"
+                        value={profileForm.currentWeight}
+                        onChange={(e) =>
+                          handleProfileInputChange('currentWeight', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Goal Weight (kg)</span>
+                      <input
+                        className="cs-input"
+                        type="number"
+                        min="0"
+                        value={profileForm.goalWeight}
+                        onChange={(e) =>
+                          handleProfileInputChange('goalWeight', e.target.value)
+                        }
+                      />
+                    </label>
+
+                    <label className="cs-field">
+                      <span className="cs-profile-label">Goal Timeframe</span>
+                      <div className="cs-goal-time-row">
+                        <input
+                          className="cs-input cs-goal-time-value"
+                          type="number"
+                          min="1"
+                          value={profileForm.goalTimeValue}
+                          onChange={(e) =>
+                            handleProfileInputChange('goalTimeValue', e.target.value)
+                          }
+                        />
+                        <select
+                          className="cs-input cs-goal-time-unit"
+                          value={profileForm.goalTimeUnit}
+                          onChange={(e) =>
+                            handleProfileInputChange('goalTimeUnit', e.target.value)
+                          }
+                        >
+                          <option value="day">days</option>
+                          <option value="week">weeks</option>
+                          <option value="month">months</option>
+                        </select>
+                      </div>
+                    </label>
                   </div>
                 ) : (
                   <>

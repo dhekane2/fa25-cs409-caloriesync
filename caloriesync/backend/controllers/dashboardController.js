@@ -5,9 +5,113 @@ import mongoose from "mongoose";
 
 export async function getDashboardProfile(req, res) {
   try {
-    const user = await User.findById(req.user.id).select("-password_hash -refresh_token");
+    const user = await User.findById(req.user.id).select(
+      "-password_hash -refresh_token"
+    );
     res.json(user);
   } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+export async function updateDashboardProfile(req, res) {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const {
+      name,
+      email,
+      phone,
+      age,
+      gender,
+      height,
+      currentWeight,
+      goalWeight,
+      goalTimeValue,
+      goalTimeUnit,
+    } = req.body || {};
+
+    const update = {};
+
+    if (typeof name === "string" && name.trim()) {
+      const [first, ...rest] = name.trim().split(" ");
+      update.first_name = first;
+      update.last_name = rest.join(" ") || "";
+    }
+
+    if (typeof email === "string" && email.trim()) {
+      update.email = email.trim();
+    }
+
+    if (typeof phone === "string") {
+      update.phone_number = phone.trim();
+    }
+
+    if (age != null) {
+      const ageNum = Number(age);
+      if (!Number.isNaN(ageNum) && ageNum > 0) {
+        update.age = ageNum;
+      }
+    }
+
+    if (typeof gender === "string" && gender.trim()) {
+      update.gender = gender;
+    }
+
+    if (height != null) {
+      const heightNum = Number(height);
+      if (!Number.isNaN(heightNum) && heightNum > 0) {
+        update.height = heightNum;
+      }
+    }
+
+    if (currentWeight != null) {
+      const w = Number(currentWeight);
+      if (!Number.isNaN(w) && w >= 0) {
+        update.weight = w;
+      }
+    }
+
+    if (goalWeight != null) {
+      const gw = Number(goalWeight);
+      if (!Number.isNaN(gw) && gw >= 0) {
+        update.goal_weight = gw;
+      }
+    }
+
+    if (goalTimeValue != null) {
+      const tv = Number(goalTimeValue);
+      if (!Number.isNaN(tv) && tv > 0) {
+        update.goal_timeframe_value = tv;
+      }
+    }
+
+    if (typeof goalTimeUnit === "string" && goalTimeUnit.trim()) {
+      const unit = goalTimeUnit.toLowerCase();
+      if (unit === "day" || unit === "days") {
+        update.goal_timeframe_unit = "days";
+      } else if (unit === "week" || unit === "weeks") {
+        update.goal_timeframe_unit = "weeks";
+      } else if (unit === "month" || unit === "months") {
+        update.goal_timeframe_unit = "months";
+      }
+    }
+
+    const user = await User.findByIdAndUpdate(userId, update, {
+      new: true,
+      runValidators: true,
+    }).select("-password_hash -refresh_token");
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error("Error updating dashboard profile:", error);
     res.status(500).json({ message: "Server error" });
   }
 }

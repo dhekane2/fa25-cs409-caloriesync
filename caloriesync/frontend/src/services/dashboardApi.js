@@ -1,20 +1,21 @@
 import apiClient from "./apiClient";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
-
 export async function fetchProfile() {
+  const res = await apiClient.get('/dashboard/profile');
+  return res.data;
+}
 
-  const res = await apiClient.get('/dashboard/profile');    
-  return await res.data;
-  
+export async function updateProfile(profilePayload) {
+  const res = await apiClient.patch('/dashboard/profile', profilePayload);
+  return res.data;
 }
 
 export async function fetchMonthlyStats(year, month) {
   const res = await apiClient.get('/dashboard/monthly', {
-      params: {
-        year: String(year),
-        month: String(month).padStart(2, '0'),
-      },
+    params: {
+      year: String(year),
+      month: String(month).padStart(2, '0'),
+    },
   });
   return res.data;
 }
