@@ -68,24 +68,27 @@ const [userEmail] = useState(() => {
     async function load() {
       try {
         const data = await fetchMealsForDate(targetDate);
-        const items = (data.items || []).map((item) => {
-          const qty = item.quantity ?? 1;
-          const totalCals = item.calorie_count ?? 0;
-          const baseCalories = qty ? totalCals / qty : totalCals;
+        const items = (data.items || [])
+          // 🔹 Ignore any 0-cal placeholder rows saved for this date
+          .filter((item) => (item.calorie_count ?? 0) > 0)
+          .map((item) => {
+            const qty = item.quantity ?? 1;
+            const totalCals = item.calorie_count ?? 0;
+            const baseCalories = qty ? totalCals / qty : totalCals;
 
-          return {
-            id: item.id,
-            food_name: item.item_name,
-            calories: totalCals,
-            protein: 0,
-            fat: 0,
-            carbs: 0,
-            quantity: qty,
-            serving_unit: 'serving',
-            source: 'db',
-            baseCalories,
-          };
-        });
+            return {
+              id: item.id,
+              food_name: item.item_name,
+              calories: totalCals,
+              protein: 0,
+              fat: 0,
+              carbs: 0,
+              quantity: qty,
+              serving_unit: 'serving',
+              source: 'db',
+              baseCalories,
+            };
+          });
 
         setMealList(items);
       } catch (err) {
@@ -260,11 +263,7 @@ const [userEmail] = useState(() => {
 
   // --- save to localStorage for this date + user ---
   const handleSaveDailyLog = async () => {
-    if (mealList.length === 0) {
-      setSaveError('Please add at least one item before saving.');
-      return;
-    }
-
+    // allow saving even when mealList is empty so 0 calories are stored
     setIsSaving(true);
     setSaveError('');
     setSaveSuccess(false);
@@ -273,7 +272,27 @@ const [userEmail] = useState(() => {
       const total = totalCalories;
 
       const loggedAt = targetDate; // YYYY-MM-DD
-      await createOrReplaceMeal(mealList, loggedAt);
+
+      // 🔹 If no items, send a single 0-cal placeholder entry so backend accepts it
+      const payloadList =
+        mealList.length === 0
+          ? [
+              {
+                id: `${Date.now()}-placeholder`,
+                food_name: 'placeholder',
+                calories: 0,
+                protein: 0,
+                fat: 0,
+                carbs: 0,
+                quantity: 1,
+                serving_unit: 'serving',
+                source: 'placeholder',
+                baseCalories: 0,
+              },
+            ]
+          : mealList;
+
+      await createOrReplaceMeal(payloadList, loggedAt);
 
       // calorieData: summary per date
       const allCalorieData = JSON.parse(
@@ -302,7 +321,7 @@ const [userEmail] = useState(() => {
       filtered.push({
         date: targetDate,
         timestamp: new Date().toISOString(),
-        items: mealList,
+        items: mealList, // keep real items (can be empty) in localStorage
         totalCalories: total,
       });
 
@@ -545,103 +564,101 @@ const [userEmail] = useState(() => {
                   </div>
                 </div>
               ) : (
-                <>
-                  <div className="cs-meal-list">
-                    {mealList.map((item) => (
-                      <div key={item.id} className="cs-meal-item">
-                        <div className="cs-meal-main">
-                          <div className="cs-search-item-name">
-                            {item.food_name}
-                          </div>
-                          <div className="cs-meal-meta">
-                            {item.calories} cal • {item.quantity}{' '}
-                            {item.serving_unit || 'serving'}
-                          </div>
+                <div className="cs-meal-list">
+                  {mealList.map((item) => (
+                    <div key={item.id} className="cs-meal-item">
+                      <div className="cs-meal-main">
+                        <div className="cs-search-item-name">
+                          {item.food_name}
                         </div>
-                        <div className="cs-meal-actions">
-                          <input
-                            type="number"
-                            min="0.5"
-                            step="0.5"
-                            className="cs-input cs-input-qty"
-                            value={item.quantity}
-                            onChange={(e) =>
-                              updateQty(
-                                item.id,
-                                e.target.value,
-                              )
-                            }
-                          />
-                          <button
-                            type="button"
-                            className="cs-btn cs-btn-xs cs-btn-outline cs-meal-remove-btn"
-                            onClick={() => removeItem(item.id)}
-                          >
-                            ✕
-                          </button>
+                        <div className="cs-meal-meta">
+                          {item.calories} cal • {item.quantity}{' '}
+                          {item.serving_unit || 'serving'}
                         </div>
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Nutrition summary */}
-                  <div className="cs-nutrition-section">
-                    <h3 className="cs-nutrition-title">
-                      Nutrition Summary
-                    </h3>
-                    <div className="cs-nutrition-grid">
-                      <div className="cs-nutrition-card cs-nutrition-card-calories">
-                        <div className="cs-nutrition-label">
-                          Total Calories
-                        </div>
-                        <div className="cs-nutrition-value">
-                          {totalCalories} cal
-                        </div>
-                      </div>
-                      <div className="cs-nutrition-card cs-nutrition-card-protein">
-                        <div className="cs-nutrition-label">
-                          Protein
-                        </div>
-                        <div className="cs-nutrition-value">
-                          {totalProtein}g
-                        </div>
-                      </div>
-                      <div className="cs-nutrition-card cs-nutrition-card-fat">
-                        <div className="cs-nutrition-label">Fat</div>
-                        <div className="cs-nutrition-value">
-                          {totalFat}g
-                        </div>
-                      </div>
-                      <div className="cs-nutrition-card cs-nutrition-card-carbs">
-                        <div className="cs-nutrition-label">Carbs</div>
-                        <div className="cs-nutrition-value">
-                          {totalCarbs}g
-                        </div>
+                      <div className="cs-meal-actions">
+                        <input
+                          type="number"
+                          min="0.5"
+                          step="0.5"
+                          className="cs-input cs-input-qty"
+                          value={item.quantity}
+                          onChange={(e) =>
+                            updateQty(
+                              item.id,
+                              e.target.value,
+                            )
+                          }
+                        />
+                        <button
+                          type="button"
+                          className="cs-btn cs-btn-xs cs-btn-outline cs-meal-remove-btn"
+                          onClick={() => removeItem(item.id)}
+                        >
+                          ✕
+                        </button>
                       </div>
                     </div>
-
-                    {saveError && (
-                      <div className="cs-error-text cs-save-error">
-                        {saveError}
-                      </div>
-                    )}
-                    {saveSuccess && (
-                      <div className="cs-save-success">
-                        ✓ Saved to your daily log
-                      </div>
-                    )}
-
-                    <button
-                      type="button"
-                      className="cs-btn cs-btn-dark cs-btn-full cs-save-log-btn"
-                      onClick={handleSaveDailyLog}
-                      disabled={isSaving}
-                    >
-                      {isSaving ? 'Saving…' : 'Save to Daily Log'}
-                    </button>
-                  </div>
-                </>
+                  ))}
+                </div>
               )}
+
+              {/* Nutrition summary */}
+              <div className="cs-nutrition-section">
+                <h3 className="cs-nutrition-title">
+                  Nutrition Summary
+                </h3>
+                <div className="cs-nutrition-grid">
+                  <div className="cs-nutrition-card cs-nutrition-card-calories">
+                    <div className="cs-nutrition-label">
+                      Total Calories
+                    </div>
+                    <div className="cs-nutrition-value">
+                      {totalCalories} cal
+                    </div>
+                  </div>
+                  <div className="cs-nutrition-card cs-nutrition-card-protein">
+                    <div className="cs-nutrition-label">
+                      Protein
+                    </div>
+                    <div className="cs-nutrition-value">
+                      {totalProtein}g
+                    </div>
+                  </div>
+                  <div className="cs-nutrition-card cs-nutrition-card-fat">
+                    <div className="cs-nutrition-label">Fat</div>
+                    <div className="cs-nutrition-value">
+                      {totalFat}g
+                    </div>
+                  </div>
+                  <div className="cs-nutrition-card cs-nutrition-card-carbs">
+                    <div className="cs-nutrition-label">Carbs</div>
+                    <div className="cs-nutrition-value">
+                      {totalCarbs}g
+                    </div>
+                  </div>
+                </div>
+
+                {saveError && (
+                  <div className="cs-error-text cs-save-error">
+                    {saveError}
+                  </div>
+                )}
+                {saveSuccess && (
+                  <div className="cs-save-success">
+                    ✓ Saved to your daily log
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  className="cs-btn cs-btn-dark cs-btn-full cs-save-log-btn"
+                  onClick={handleSaveDailyLog}
+                  disabled={isSaving}
+                >
+                  {isSaving ? 'Saving…' : 'Save to Daily Log'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
