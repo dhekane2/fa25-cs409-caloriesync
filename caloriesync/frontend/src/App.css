@@ -1029,6 +1029,63 @@
   border: 1px solid #bbf7d0;
 }
 
+/* RESPONSIVE BEHAVIOUR */
+
+/* Stack left + right columns on phone layouts */
+@media (max-width: 900px) {
+  .cs-dashboard-screen {
+    overflow-x: hidden;
+  }
+
+  .cs-dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .cs-dashboard-left,
+  .cs-dashboard-right {
+    width: 100%;
+    gap: 20px;
+  }
+
+  .cs-card {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+/* Header fix for smaller phones layouts */
+@media (max-width: 600px) {
+  .cs-dashboard-header-inner {
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-left: 12px;
+    padding-right: 12px;
+    row-gap: 8px;
+  }
+
+  .cs-dashboard-brand {
+    flex: 1 1 auto;
+  }
+
+  .cs-dashboard-header-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    flex: 0 0 auto;
+    white-space: nowrap; 
+  }
+
+  .cs-dashboard-welcome {
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .cs-btn {
+    white-space: nowrap;
+  }
+}
 
 /* ================================
    TRACK CALORIES (SEARCH + MANUAL + LIST)
