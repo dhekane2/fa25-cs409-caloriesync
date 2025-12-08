@@ -874,6 +874,37 @@
   margin-bottom: 16px;
 }
 
+/* Fancy buttons for calendar + week nav */
+.cs-calendar-nav button,
+.cs-week-nav-row button {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease;
+}
+
+.cs-calendar-nav button:hover,
+.cs-week-nav-row button:hover {
+  background: #f1f5f9;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.12);
+  transform: translateY(-1px);
+}
+
+.cs-calendar-nav button:disabled,
+.cs-week-nav-row button:disabled {
+  background: #f9fafb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  box-shadow: none;
+  border-color: #e5e7eb;
+  transform: none;
+}
+
 .cs-calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -910,6 +941,19 @@
 .cs-calendar-cell-out {
   background: #f1f5f9;
   opacity: 0.45;
+}
+
+/* Today highlight */
+.cs-calendar-cell-today {
+  box-shadow: 0 0 0 2px #bfdbfe;
+  background: #eff6ff;
+}
+
+/* Disabled (non-today) dates */
+.cs-calendar-cell-disabled {
+  cursor: default;
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .cs-calendar-cell-day {
@@ -984,6 +1028,7 @@
   padding: 8px 10px;
   border: 1px solid #bbf7d0;
 }
+
 
 /* ================================
    TRACK CALORIES (SEARCH + MANUAL + LIST)

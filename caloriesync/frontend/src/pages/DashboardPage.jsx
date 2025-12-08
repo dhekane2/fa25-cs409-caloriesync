@@ -277,7 +277,8 @@ export default function DashboardPage() {
   
 
   const handlePrevMonth = () => setMonthOffset((o) => o - 1);
-  const handleNextMonth = () => setMonthOffset((o) => o + 1);
+  const handleNextMonth = () =>
+    setMonthOffset((o) => (o < 0 ? o + 1 : 0)); // don’t go into future
 
   const handlePrevWeek = () => setWeekOffset((o) => o + 1); // older
   const handleNextWeek = () =>
@@ -445,10 +446,22 @@ const handleProfileSave = async () => {
 
   /* ---------- calendar → track navigation ---------- */
 
-  const handleDayClick = (dayObj) => {
+ const handleDayClick = (dayObj) => {
     if (!dayObj?.key) return;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const date = new Date(dayObj.key + "T00:00:00");
+    date.setHours(0, 0, 0, 0);
+
+    // Block future dates
+    if (date.getTime() > today.getTime()) return;
+
+    // Allow today and all past dates
     nav(`/track?date=${dayObj.key}`);
   };
+
   return (
     <div className="cs-dashboard-screen">
       <header className="cs-dashboard-header">
@@ -718,7 +731,7 @@ const handleProfileSave = async () => {
 
               <div className="cs-calendar-nav">
                 <button onClick={handlePrevMonth}>‹ Prev</button>
-                <button onClick={handleNextMonth}>Next ›</button>
+                <button onClick={handleNextMonth} disabled={monthOffset === 0}>Next ›</button>
               </div>
 
               <CalendarGrid
@@ -769,6 +782,9 @@ const handleProfileSave = async () => {
 function CalendarGrid({ days = [], onDayClick }) {
   const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   return (
     <div>
       <div className="cs-calendar-weekdays">
@@ -776,16 +792,38 @@ function CalendarGrid({ days = [], onDayClick }) {
       </div>
 
       <div className="cs-calendar-grid">
-        {days?.map((d) => (
-          <div
-            key={d?.key}
-            className={'cs-calendar-cell ' + (d?.inMonth ? '' : 'cs-calendar-cell-out')}
-            onClick={() => onDayClick?.(d)}
-          >
-            <div>{d?.day}</div>
-            <div>{d?.total ? `${d.total} cal` : ''}</div>
-          </div>
-        ))}
+        {days?.map((d) => {
+          const cellDate = d?.key ? new Date(d.key + "T00:00:00") : null;
+          if (cellDate) {
+            cellDate.setHours(0, 0, 0, 0);
+          }
+
+          const isToday =
+            cellDate && cellDate.getTime() === today.getTime();
+          const isFuture =
+            cellDate && cellDate.getTime() > today.getTime();
+          const isClickable = !isFuture; // past + today clickable
+
+          let cellClass = 'cs-calendar-cell ';
+          if (!d?.inMonth) cellClass += 'cs-calendar-cell-out ';
+          if (isToday) cellClass += 'cs-calendar-cell-today ';
+          if (isFuture) cellClass += 'cs-calendar-cell-disabled ';
+
+          return (
+            <div
+              key={d?.key}
+              className={cellClass}
+              onClick={() => {
+                if (isClickable) {
+                  onDayClick?.(d);
+                }
+              }}
+            >
+              <div>{d?.day}</div>
+              <div>{d?.total ? `${d.total} cal` : ''}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
