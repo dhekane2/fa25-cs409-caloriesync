@@ -780,7 +780,7 @@ const handleProfileSave = async () => {
 }
 
 function CalendarGrid({ days = [], onDayClick }) {
-  const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const weekday = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
