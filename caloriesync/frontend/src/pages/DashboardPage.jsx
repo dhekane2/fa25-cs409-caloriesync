@@ -780,7 +780,7 @@ export default function DashboardPage() {
 /* -------- Calendar grid with correct weekday alignment -------- */
 
 function CalendarGrid({ days = [], onDayClick }) {
-  // Show week starting Sunday, like your screenshot
+  // Show week starting Sunday
   const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   const today = new Date();
