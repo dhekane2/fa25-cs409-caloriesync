@@ -6,12 +6,19 @@ import {
   createOrReplaceMeal,
 } from '../services/api.js';
 
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`; // YYYY-MM-DD in local time
+}
+
 export default function TrackCaloriesPage() {
   const nav = useNavigate();
   const location = useLocation();
 
   // --- date handling (supports /track?date=YYYY-MM-DD) ---
-  const todayStr = new Date().toISOString().substring(0, 10);
+  const todayStr = getLocalDateString();              // <-- CHANGED
   const searchParams = new URLSearchParams(location.search);
   const selectedDate = searchParams.get('date');
   const targetDate = selectedDate || todayStr;
@@ -22,18 +29,18 @@ export default function TrackCaloriesPage() {
     { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' },
   );
 
-const [userEmail] = useState(() => {
-  try {
-    const stored = localStorage.getItem('cs_profile');
-    if (stored) {
-      const p = JSON.parse(stored);
-      return p.email || '';
+  const [userEmail] = useState(() => {
+    try {
+      const stored = localStorage.getItem('cs_profile');
+      if (stored) {
+        const p = JSON.parse(stored);
+        return p.email || '';
+      }
+    } catch {
+      // ignore parse errors
     }
-  } catch {
-    // ignore parse errors
-  }
-  return '';
-});
+    return '';
+  });
 
   // --- search + manual entry state ---
   const [searchTerm, setSearchTerm] = useState('');
