@@ -190,16 +190,14 @@ export default function DashboardPage() {
           month: "long",
         });
 
-
-
         const days = (raw.days || []).map((d) => {
           const dateObj = new Date(d.date + "T00:00:00");
           return {
-          key: d.date,
-          inMonth: d.in_current_month,
-          day: dateObj.getDate(),
-          total: d.total_calories || 0,
-        }
+            key: d.date,
+            inMonth: d.in_current_month,
+            day: dateObj.getDate(),
+            total: d.total_calories || 0,
+          }
         });
         
         const total = days.reduce((sum, d) => sum + (d.total || 0), 0);
@@ -306,105 +304,105 @@ export default function DashboardPage() {
     }));
   };
 
-const handleProfileSave = async () => {
-  if (!profile || !profileForm) return;
+  const handleProfileSave = async () => {
+    if (!profile || !profileForm) return;
 
-  const goalTimeValueNum = parseFloat(profileForm.goalTimeValue) || 0;
-  const goalTimeUnit = profileForm.goalTimeUnit || 'month';
+    const goalTimeValueNum = parseFloat(profileForm.goalTimeValue) || 0;
+    const goalTimeUnit = profileForm.goalTimeUnit || 'month';
 
-  const updated = {
-    ...profile,
-    name: profileForm.name.trim() || profile.name,
-    email: profileForm.email.trim() || profile.email,
-    phone: profileForm.phone.trim(),
-    age: Number(profileForm.age) || profile.age,
-    gender: profileForm.gender || profile.gender,
-    currentWeight:
-      Number(profileForm.currentWeight) || profile.currentWeight,
-    goalWeight: Number(profileForm.goalWeight) || profile.goalWeight,
-    goalTimeValue: goalTimeValueNum || profile.goalTimeValue,
-    goalTimeUnit,
-  };
-
-  if (updated.goalTimeValue && updated.goalTimeUnit) {
-    const unitLabel =
-      updated.goalTimeUnit === 'day'
-        ? 'days'
-        : updated.goalTimeUnit === 'week'
-        ? 'weeks'
-        : 'months';
-    updated.goalTimeframe = `${updated.goalTimeValue} ${unitLabel}`;
-  }
-
-  // Recalculate daily target using helper
-  updated.dailyTarget = calculateDailyTargetCalories(
-    updated.currentWeight,
-    updated.goalWeight,
-    updated.goalTimeValue,
-    updated.goalTimeUnit,
-    updated.age,
-    updated.gender,
-    updated.height,
-  );
-
-  // 1) Persist to backend
-  try {
-    const payload = {
-      name: updated.name,
-      email: updated.email,
-      phone: updated.phone,
-      age: updated.age,
-      gender: updated.gender,
-      height: updated.height,
-      currentWeight: updated.currentWeight,
-      goalWeight: updated.goalWeight,
-      goalTimeValue: updated.goalTimeValue,
-      goalTimeUnit: updated.goalTimeUnit,
+    const updated = {
+      ...profile,
+      name: profileForm.name.trim() || profile.name,
+      email: profileForm.email.trim() || profile.email,
+      phone: profileForm.phone.trim(),
+      age: Number(profileForm.age) || profile.age,
+      gender: profileForm.gender || profile.gender,
+      currentWeight:
+        Number(profileForm.currentWeight) || profile.currentWeight,
+      goalWeight: Number(profileForm.goalWeight) || profile.goalWeight,
+      goalTimeValue: goalTimeValueNum || profile.goalTimeValue,
+      goalTimeUnit,
     };
 
-    const saved = await saveProfile(payload);
+    if (updated.goalTimeValue && updated.goalTimeUnit) {
+      const unitLabel =
+        updated.goalTimeUnit === 'day'
+          ? 'days'
+          : updated.goalTimeUnit === 'week'
+          ? 'weeks'
+          : 'months';
+      updated.goalTimeframe = `${updated.goalTimeValue} ${unitLabel}`;
+    }
 
-    // Re-normalize backend response into our profile shape
-    const name = `${saved.first_name || ''} ${saved.last_name || ''}`.trim();
-    const currentWeight = saved.weight;
-    const goalWeight = saved.goal_weight;
-    const goalTimeValue = saved.goal_timeframe_value;
-
-    const rawUnit = saved.goal_timeframe_unit || 'months';
-    const lowerUnit = rawUnit.toLowerCase();
-    let goalTimeUnit = 'month';
-    if (lowerUnit.startsWith('day')) goalTimeUnit = 'day';
-    else if (lowerUnit.startsWith('week')) goalTimeUnit = 'week';
-
-    const goalTimeframe = `${goalTimeValue} ${rawUnit}`;
-
-    const dailyTarget = calculateDailyTargetCalories(
-      currentWeight,
-      goalWeight,
-      goalTimeValue,
-      goalTimeUnit,
-      saved.age,
-      saved.gender,
-      saved.height,
+    // Recalculate daily target using helper
+    updated.dailyTarget = calculateDailyTargetCalories(
+      updated.currentWeight,
+      updated.goalWeight,
+      updated.goalTimeValue,
+      updated.goalTimeUnit,
+      updated.age,
+      updated.gender,
+      updated.height,
     );
 
-    const normalized = {
-      ...saved,
-      name,
-      currentWeight,
-      goalWeight,
-      goalTimeValue,
-      goalTimeUnit,
-      goalTimeframe,
-      dailyTarget,
-    };
+    // 1) Persist to backend
+    try {
+      const payload = {
+        name: updated.name,
+        email: updated.email,
+        phone: updated.phone,
+        age: updated.age,
+        gender: updated.gender,
+        height: updated.height,
+        currentWeight: updated.currentWeight,
+        goalWeight: updated.goalWeight,
+        goalTimeValue: updated.goalTimeValue,
+        goalTimeUnit: updated.goalTimeUnit,
+      };
 
-    setProfile(normalized);
-    setIsEditingProfile(false);
-  } catch (err) {
-    console.error('Failed to update profile', err);
-  }
-};
+      const saved = await saveProfile(payload);
+
+      // Re-normalize backend response into our profile shape
+      const name = `${saved.first_name || ''} ${saved.last_name || ''}`.trim();
+      const currentWeight = saved.weight;
+      const goalWeight = saved.goal_weight;
+      const goalTimeValue = saved.goal_timeframe_value;
+
+      const rawUnit = saved.goal_timeframe_unit || 'months';
+      const lowerUnit = rawUnit.toLowerCase();
+      let goalTimeUnit = 'month';
+      if (lowerUnit.startsWith('day')) goalTimeUnit = 'day';
+      else if (lowerUnit.startsWith('week')) goalTimeUnit = 'week';
+
+      const goalTimeframe = `${goalTimeValue} ${rawUnit}`;
+
+      const dailyTarget = calculateDailyTargetCalories(
+        currentWeight,
+        goalWeight,
+        goalTimeValue,
+        goalTimeUnit,
+        saved.age,
+        saved.gender,
+        saved.height,
+      );
+
+      const normalized = {
+        ...saved,
+        name,
+        currentWeight,
+        goalWeight,
+        goalTimeValue,
+        goalTimeUnit,
+        goalTimeframe,
+        dailyTarget,
+      };
+
+      setProfile(normalized);
+      setIsEditingProfile(false);
+    } catch (err) {
+      console.error('Failed to update profile', err);
+    }
+  };
 
   /* ---------- derived goal progress values ---------- */
 
@@ -446,7 +444,7 @@ const handleProfileSave = async () => {
 
   /* ---------- calendar → track navigation ---------- */
 
- const handleDayClick = (dayObj) => {
+  const handleDayClick = (dayObj) => {
     if (!dayObj?.key) return;
 
     const today = new Date();
@@ -779,11 +777,44 @@ const handleProfileSave = async () => {
   );
 }
 
+/* -------- Calendar grid with correct weekday alignment -------- */
+
 function CalendarGrid({ days = [], onDayClick }) {
-  const weekday = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  // Show week starting Sunday, like your screenshot
+  const weekday = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+
+  // Ensure days are sorted by date string
+  const sortedDays = [...days].sort((a, b) =>
+    (a.key || '').localeCompare(b.key || '')
+  );
+
+  // Find the first "in month" day (e.g., Dec 1)
+  const firstInMonthIndex = sortedDays.findIndex((d) => d.inMonth);
+  const firstInMonth =
+    firstInMonthIndex >= 0 ? sortedDays[firstInMonthIndex] : sortedDays[0];
+
+  let paddedDays = sortedDays;
+
+  // If the API did NOT already give us leading out-of-month days,
+  // we add blank cells so the first day of the month appears under the right weekday.
+  if (firstInMonth && firstInMonthIndex <= 0 && firstInMonth.key) {
+    const firstDate = new Date(firstInMonth.key + 'T00:00:00');
+    firstDate.setHours(0, 0, 0, 0);
+    const startWeekday = firstDate.getDay(); // 0=Sun..6=Sat
+
+    if (startWeekday > 0) {
+      const blanks = Array.from({ length: startWeekday }, (_, i) => ({
+        key: `blank-${i}`,
+        inMonth: false,
+        day: '',
+        total: null,
+      }));
+      paddedDays = [...blanks, ...sortedDays];
+    }
+  }
 
   return (
     <div>
@@ -792,8 +823,9 @@ function CalendarGrid({ days = [], onDayClick }) {
       </div>
 
       <div className="cs-calendar-grid">
-        {days?.map((d) => {
-          const cellDate = d?.key ? new Date(d.key + "T00:00:00") : null;
+        {paddedDays?.map((d) => {
+          const isBlank = d?.key && String(d.key).startsWith('blank-');
+          const cellDate = !isBlank && d?.key ? new Date(d.key + "T00:00:00") : null;
           if (cellDate) {
             cellDate.setHours(0, 0, 0, 0);
           }
@@ -802,7 +834,7 @@ function CalendarGrid({ days = [], onDayClick }) {
             cellDate && cellDate.getTime() === today.getTime();
           const isFuture =
             cellDate && cellDate.getTime() > today.getTime();
-          const isClickable = !isFuture; // past + today clickable
+          const isClickable = !!cellDate && !isFuture; // only real past/today dates clickable
 
           let cellClass = 'cs-calendar-cell ';
           if (!d?.inMonth) cellClass += 'cs-calendar-cell-out ';
