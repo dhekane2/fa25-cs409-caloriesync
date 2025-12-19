@@ -14,7 +14,7 @@ CaloriSync bridges the gap between nutrition planning and actual eating behavior
 ## 📋 Table of Contents
 
 - [Problem Statement](#-problem-statement)
-- [System Architecture](#-system-diagram)
+- [System Architecture](#️-architecture-diagram)
 - [Key Features](#-key-features)
 - [What Makes Us Different](#-what-makes-us-different)
 - [Tech Stack](#-tech-stack)
