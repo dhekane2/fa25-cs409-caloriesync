@@ -38,7 +38,7 @@ Most nutrition tracking apps focus solely on recording what users eat, but they 
 ---
 
 ## 🏛️ Architecture Diagram
-![System Architecture](doc\system-arch.png)
+![System Architecture](/doc/system-arch.png)
 
 
 ---
